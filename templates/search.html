@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Insight | Search Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            --accent-gradient: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+            --card-bg: rgba(255, 255, 255, 0.12);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-hover-border: rgba(255, 255, 255, 0.25);
+            --card-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            --blue-glow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--primary-gradient);
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        .search-box {
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+        }
+        
+        .flight-card {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background: var(--card-bg);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        .flight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-hover-border);
+        }
+        
+        .price-tag {
+            background: var(--accent-gradient);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 10px rgba(241, 39, 17, 0.3);
+        }
+        
+        .airline-logo {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+            transition: transform 0.3s ease;
+        }
+        
+        .flight-card:hover .airline-logo {
+            transform: scale(1.05);
+        }
+        
+        .flight-path {
+            position: relative;
+        }
+        
+        .flight-path-line {
+            height: 2px;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.8), rgba(59, 130, 246, 0.2));
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .flight-path-line::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            100% {
+                left: 100%;
+            }
+        }
+        
+        .flight-icon {
+            animation: fly 3s infinite ease-in-out;
+            filter: drop-shadow(0 0 3px rgba(59, 130, 246, 0.5));
+        }
+        
+        @keyframes fly {
+            0%, 100% {
+                transform: translateY(0) rotate(90deg);
+            }
+            50% {
+                transform: translateY(-5px) rotate(90deg);
+            }
+        }
+        
+        .time-badge {
+            background: rgba(59, 130, 246, 0.15);
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+        }
+        
+        .flight-card:hover .time-badge {
+            box-shadow: var(--blue-glow);
+            background: rgba(59, 130, 246, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(55, 65, 81, 0.5);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(55, 65, 81, 0.7);
+        }
+        
+        .newsletter-box {
+            background: linear-gradient(135deg, rgba(30, 64, 175, 0.6), rgba(30, 58, 138, 0.8));
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .pagination-item {
+            transition: all 0.3s ease;
+        }
+        
+        .pagination-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--blue-glow);
+        }
+        
+        .header-nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .header-nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #3b82f6;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .header-nav-link:hover::after,
+        .header-nav-link.active::after {
+            width: 100%;
+        }
+        
+        .header-nav-link.active {
+            color: #93c5fd;
+        }
+        
+        /* Loading animation */
+        .loading-indicator {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Tooltip styles */
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- Loading Indicator -->
+    <div class="loading-indicator" id="loadingIndicator">
+        <div class="text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-xl font-medium">Finding the best flights for you...</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="py-6 px-4 md:px-12 backdrop-blur-sm bg-black bg-opacity-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-plane-departure text-3xl text-blue-300"></i>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a href="{{ url_for('index') }}" class="hover:text-blue-300 transition border-b-2 border-blue-300 py-1 text-blue-300">Home</a>
+                
+                <div class="relative group">
+                    <a href="{{ url_for('explore') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Explore</a>
+                    <div class="absolute hidden group-hover:block mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-xl p-4 shadow-xl w-48 z-10">
+                        <a href="{{ url_for('explore') }}?category=europe" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Europe</a>
+                        <a href="{{ url_for('explore') }}?category=asia" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Asia</a>
+                        <a href="{{ url_for('explore') }}?category=americas" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Americas</a>
+                        <a href="{{ url_for('explore') }}?category=africa" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Africa</a>
+                        <a href="{{ url_for('explore') }}?category=oceania" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Oceania</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('deals') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1 relative">
+                    Deals
+                    <span class="absolute -top-2 -right-6 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">Hot</span>
+                </a>
+
+                <a href="{{ url_for('contact') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Contact</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('signin') }}" class="hidden md:block px-4 py-2 rounded-full bg-blue-500 hover:bg-blue-600 transition shadow-lg hover:shadow-blue-500/50">Sign In</a>
+                <button class="md:hidden text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Results -->
+    <section class="py-12 px-4 md:px-12">
+        <div class="container mx-auto">
+            <div class="mb-8" data-aos="fade-up" data-aos-duration="800">
+                <h2 class="text-3xl font-bold mb-4">Flight Results</h2>
+                <div class="flex flex-wrap items-center text-blue-200">
+                    <div class="mr-6 mb-4 bg-blue-900 bg-opacity-30 px-4 py-2 rounded-full">
+                        <span class="font-bold text-white">{{ from_location }}</span> 
+                        <i class="fas fa-arrow-right mx-2 text-blue-300"></i> 
+                        <span class="font-bold text-white">{{ to_location }}</span>
+                    </div>
+                    <div class="mr-6 mb-4 bg-blue-900 bg-opacity-30 px-4 py-2 rounded-full">
+                        <i class="far fa-calendar-alt mr-2 text-blue-300"></i> {{ departure_date }}
+                    </div>
+                    <div class="mb-4 bg-blue-900 bg-opacity-30 px-4 py-2 rounded-full">
+                        <i class="fas fa-plane mr-2 text-blue-300"></i> {{ flights|length }} flights found
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div class="mb-8 search-box p-6" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
+                <div class="flex flex-wrap items-center justify-between">
+                    <div class="flex flex-wrap items-center gap-6">
+                        <div class="mb-2">
+                            <label class="block text-blue-200 text-sm mb-2 font-medium">Sort by</label>
+                            <select class="bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-48">
+                                <option>Price: Low to High</option>
+                                <option>Price: High to Low</option>
+                                <option>Duration: Shortest</option>
+                                <option>Departure: Earliest</option>
+                                <option>Departure: Latest</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="block text-blue-200 text-sm mb-2 font-medium">Stops</label>
+                            <select class="bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-48">
+                                <option>Any</option>
+                                <option>Direct only</option>
+                                <option>1 stop max</option>
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="block text-blue-200 text-sm mb-2 font-medium">Price Range</label>
+                            <div class="flex items-center space-x-4">
+                                <input type="range" min="0" max="10000" value="10000" class="w-48 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer" id="priceRange">
+                                <span class="text-white font-medium" id="priceValue">10,000 MAD</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="px-6 py-3 btn-primary rounded-lg transition mt-4 md:mt-0 font-medium">
+                        <i class="fas fa-filter mr-2"></i> Apply Filters
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Flight Cards -->
+            <div class="space-y-8">
+                {% if flights %}
+                    {% for flight in flights %}
+                        <div class="flight-card p-6" data-aos="fade-up" data-aos-duration="800" data-aos-delay="{{ loop.index * 100 }}">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                                <div class="flex items-center mb-4 md:mb-0">
+                                    {% set logo_found = false %}
+                {% set first_airline_name = flight.airline.split(',')[0].strip() if flight.airline else '' %}
+                
+                {% if first_airline_name and airline_logos.get(first_airline_name) %}
+                    <img src="{{ airline_logos.get(first_airline_name) }}" alt="{{ first_airline_name }}" class="h-10 mr-4 airline-logo object-contain">
+                    {% set logo_found = true %}
+                {% elif flight.airline %}
+                    {# Try to find a logo for any airline in the string if the first one wasn't specific enough #}
+                    {% for known_airline, logo_url in airline_logos.items() %}
+                        {% if known_airline != 'DEFAULT' and known_airline in flight.airline and not logo_found %}
+                            <img src="{{ logo_url }}" alt="{{ known_airline }}" class="h-10 mr-4 airline-logo object-contain">
+                            {% set logo_found = true %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+
+                {% if not logo_found %}
+                    <img src="{{ airline_logos.DEFAULT }}" alt="Airline" class="h-10 mr-4 airline-logo object-contain">
+                {% endif %}
+                                    <div>
+                                        <p class="font-bold text-lg">{{ flight.airline }}</p>
+                                        <div class="flex items-center">
+                                            <span class="text-blue-200 text-sm mr-2">{{ flight.stops }}</span>
+                                            {% if flight.stops == 'Direct' %}
+                                                <span class="bg-green-500 bg-opacity-20 text-green-400 text-xs px-2 py-0.5 rounded-full">Nonstop</span>
+                                            {% else %}
+                                                <span class="bg-yellow-500 bg-opacity-20 text-yellow-400 text-xs px-2 py-0.5 rounded-full">{{ flight.stops }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="price-tag px-6 py-3 rounded-lg font-bold text-white text-xl">
+                                        {{ flight.price }} MAD
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                                <div>
+                                    <div class="flex items-center mb-3">
+                                        <div class="w-14 h-14 time-badge flex items-center justify-center mr-4">
+                                            <i class="fas fa-plane-departure text-blue-300 text-xl"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-3xl font-bold">{{ flight.departure_time }}</p>
+                                            <p class="text-blue-200">{{ flight.from }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex flex-col items-center justify-center flight-path">
+                                    <div class="w-full flex items-center">
+                                        <div class="h-0.5 flex-grow flight-path-line"></div>
+                                        <i class="fas fa-plane text-blue-300 mx-3 flight-icon"></i>
+                                        <div class="h-0.5 flex-grow flight-path-line"></div>
+                                    </div>
+                                    <div class="flex items-center mt-3">
+                                        <p class="text-blue-200 font-medium">{{ flight.duration }}</p>
+                                        <span class="mx-2 text-gray-400">•</span>
+                                        <p class="text-blue-200">{{ flight.stops }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center mb-3 justify-end">
+                                        <div>
+                                            <p class="text-3xl font-bold text-right">{{ flight.arrival_time }}</p>
+                                            <p class="text-blue-200 text-right">{{ flight.to }}</p>
+                                        </div>
+                                        <div class="w-14 h-14 time-badge flex items-center justify-center ml-4">
+                                            <i class="fas fa-plane-arrival text-blue-300 text-xl"></i>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col md:flex-row justify-between items-center border-t border-blue-900 border-opacity-30 pt-6">
+                                <div class="mb-4 md:mb-0 flex items-center space-x-6">
+                                    <div class="tooltip">
+                                        <p class="text-blue-200"><i class="fas fa-suitcase-rolling mr-2 text-blue-300"></i> Baggage included</p>
+                                        <span class="tooltip-text">1 checked bag (23kg)</span>
+                                    </div>
+                                    <div class="tooltip">
+                                        <p class="text-blue-200"><i class="fas fa-exchange-alt mr-2 text-blue-300"></i> Non-refundable</p>
+                                        <span class="tooltip-text">Changes not allowed</span>
+                                    </div>
+                                    {% if flight.business_price != 'N/A' %}
+                                    <div class="tooltip">
+                                        <p class="text-blue-200"><i class="fas fa-crown mr-2 text-yellow-400"></i> Business available</p>
+                                        <span class="tooltip-text">{{ flight.business_price }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="flex space-x-4">
+                                    <button class="px-5 py-3 btn-secondary rounded-lg transition">
+                                        <i class="far fa-heart mr-2"></i> Save
+                                    </button>
+                                    <a href="{{ flight.booking_link }}" target="_blank" class="px-6 py-3 btn-primary rounded-lg transition font-medium">
+                                        Select <i class="fas fa-arrow-right ml-2"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="flight-card p-10 rounded-xl text-center" data-aos="fade-up" data-aos-duration="800">
+                        <div class="w-24 h-24 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fas fa-search text-blue-300 text-4xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">No flights found</h3>
+                        <p class="text-blue-200 mb-8 max-w-lg mx-auto">We couldn't find any flights matching your search criteria. Please try different dates or destinations.</p>
+                        <a href="/" class="px-8 py-4 btn-primary rounded-lg transition inline-block font-medium">
+                            <i class="fas fa-redo mr-2"></i> New Search
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if flights and flights|length > 10 %}
+                <div class="mt-12 flex justify-center" data-aos="fade-up" data-aos-duration="800" data-aos-delay="300">
+                    <div class="flex space-x-2">
+                        <a href="#" class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-800 bg-opacity-50 hover:bg-blue-600 transition pagination-item">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 flex items-center justify-center rounded-lg bg-blue-600 transition pagination-item">1</a>
+                        <a href="#" class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-800 bg-opacity-50 hover:bg-blue-600 transition pagination-item">2</a>
+                        <a href="#" class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-800 bg-opacity-50 hover:bg-blue-600 transition pagination-item">3</a>
+                        <span class="w-10 h-10 flex items-center justify-center">...</span>
+                        <a href="#" class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-800 bg-opacity-50 hover:bg-blue-600 transition pagination-item">10</a>
+                        <a href="#" class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-800 bg-opacity-50 hover:bg-blue-600 transition pagination-item">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+    
+    <!-- Newsletter -->
+    <section class="py-16 px-4 md:px-12 mb-12">
+        <div class="container mx-auto">
+            <div class="newsletter-box p-8 md:p-12" data-aos="fade-up" data-aos-duration="800">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold mb-4">Get Travel Deals & Inspiration</h2>
+                    <p class="text-xl text-blue-100 max-w-2xl mx-auto">Subscribe to our newsletter and never miss out on exclusive deals and travel tips</p>
+                </div>
+                
+                <div class="max-w-xl mx-auto">
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <input type="email" placeholder="Your email address" class="flex-grow bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button class="px-6 py-3 btn-primary rounded-lg font-bold transition">
+                            Subscribe <i class="fas fa-paper-plane ml-2"></i>
+                        </button>
+                    </div>
+                    <p class="text-sm text-blue-200 mt-4 text-center">We respect your privacy. Unsubscribe at any time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 md:px-12 bg-gray-900 bg-opacity-50 backdrop-blur-sm">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <i class="fas fa-plane-departure text-3xl text-blue-300"></i>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h2>
+                    </div>
+                    <p class="text-blue-200 mb-6">Find the best flight deals across multiple airlines and book with confidence.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-blue-900 bg-opacity-30 flex items-center justify-center hover:bg-blue-800 transition">
+                            <i class="fab fa-facebook-f text-blue-300"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-blue-900 bg-opacity-30 flex items-center justify-center hover:bg-blue-800 transition">
+                            <i class="fab fa-twitter text-blue-300"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-blue-900 bg-opacity-30 flex items-center justify-center hover:bg-blue-800 transition">
+                            <i class="fab fa-instagram text-blue-300"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-blue-900 bg-opacity-30 flex items-center justify-center hover:bg-blue-800 transition">
+                            <i class="fab fa-linkedin-in text-blue-300"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Quick Links</h3>
+                    <ul class="space-y-3">
+                        <li><a href="/" class="text-blue-200 hover:text-white transition">Home</a></li>
+                        <li><a href="/explore" class="text-blue-200 hover:text-white transition">Explore Destinations</a></li>
+                        <li><a href="/deals" class="text-blue-200 hover:text-white transition">Flight Deals</a></li>
+                        <li><a href="/about" class="text-blue-200 hover:text-white transition">About Us</a></li>
+                        <li><a href="/contact" class="text-blue-200 hover:text-white transition">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Support</h3>
+                    <ul class="space-y-3">
+                        <li><a href="/faq" class="text-blue-200 hover:text-white transition">FAQ</a></li>
+                        <li><a href="/booking-guide" class="text-blue-200 hover:text-white transition">Booking Guide</a></li>
+                        <li><a href="/terms" class="text-blue-200 hover:text-white transition">Terms & Conditions</a></li>
+                        <li><a href="/privacy" class="text-blue-200 hover:text-white transition">Privacy Policy</a></li>
+                        <li><a href="/support" class="text-blue-200 hover:text-white transition">Customer Support</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Contact Us</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-3 text-blue-300"></i>
+                            <span class="text-blue-200">123 Aviation Street, Casablanca, Morocco</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope mt-1 mr-3 text-blue-300"></i>
+                            <span class="text-blue-200">contact@flightinsight.com</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-phone-alt mt-1 mr-3 text-blue-300"></i>
+                            <span class="text-blue-200">+212 522 123 456</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-clock mt-1 mr-3 text-blue-300"></i>
+                            <span class="text-blue-200">Mon-Fri: 9AM - 6PM</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-blue-900 border-opacity-30 pt-8 text-center">
+                <p class="text-blue-200">&copy; 2025 Flight Insight. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to top button -->
+    <button id="backToTop" class="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg transform transition-transform duration-300 scale-0 hover:bg-blue-700">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        // Initialize AOS animation library
+        AOS.init();
+        
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+        
+        // Price range slider
+        const priceRange = document.getElementById('priceRange');
+        const priceValue = document.getElementById('priceValue');
+        
+        if (priceRange && priceValue) {
+            priceRange.addEventListener('input', () => {
+                priceValue.textContent = Number(priceRange.value).toLocaleString() + ' MAD';
+            });
+        }
+        
+        // Back to top button
+        const backToTopBtn = document.getElementById('backToTop');
+        
+        if (backToTopBtn) {
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.classList.remove('scale-0');
+                    backToTopBtn.classList.add('scale-100');
+                } else {
+                    backToTopBtn.classList.remove('scale-100');
+                    backToTopBtn.classList.add('scale-0');
+                }
+            });
+            
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+        
+        // Loading indicator for demonstration
+        // In a real application, this would be triggered when making API calls
+        function showLoading() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'flex';
+            }
+        }
+        
+        function hideLoading() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+        
+        // Example: Simulate loading when clicking filter button
+        const filterBtn = document.querySelector('.btn-primary');
+        if (filterBtn) {
+            filterBtn.addEventListener('click', () => {
+                showLoading();
+                // Simulate API call
+                setTimeout(() => {
+                    hideLoading();
+                }, 1500);
+            });
+        }
+    </script>
+</body>
+</html>

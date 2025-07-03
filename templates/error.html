@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Insight | Error</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- Header -->
+    <header class="py-6 px-4 md:px-12 backdrop-blur-sm bg-black bg-opacity-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-plane-departure text-3xl text-blue-300"></i>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a href="{{ url_for('index') }}" class="hover:text-blue-300 transition border-b-2 border-blue-300 py-1 text-blue-300">Home</a>
+                
+                <div class="relative group">
+                    <a href="{{ url_for('explore') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Explore</a>
+                    <div class="absolute hidden group-hover:block mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-xl p-4 shadow-xl w-48 z-10">
+                        <a href="{{ url_for('explore') }}?category=europe" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Europe</a>
+                        <a href="{{ url_for('explore') }}?category=asia" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Asia</a>
+                        <a href="{{ url_for('explore') }}?category=americas" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Americas</a>
+                        <a href="{{ url_for('explore') }}?category=africa" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Africa</a>
+                        <a href="{{ url_for('explore') }}?category=oceania" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Oceania</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('deals') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1 relative">
+                    Deals
+                    <span class="absolute -top-2 -right-6 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">Hot</span>
+                </a>
+
+                <a href="{{ url_for('contact') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Contact</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('signin') }}" class="hidden md:block px-4 py-2 rounded-full bg-blue-500 hover:bg-blue-600 transition shadow-lg hover:shadow-blue-500/50">Sign In</a>
+                <button class="md:hidden text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Error Content -->
+    <section class="py-12 px-4 md:px-12">
+        <div class="container mx-auto text-center">
+            <div class="w-24 h-24 bg-red-500 bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-8">
+                <i class="fas fa-exclamation-triangle text-red-300 text-4xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold mb-6">Oops! Something went wrong</h2>
+            <p class="text-xl text-blue-100 max-w-2xl mx-auto mb-8">{{ error }}</p>
+            <a href="/" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition inline-block">
+                <i class="fas fa-home mr-2"></i> Return to Home
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 md:px-12 bg-gray-900 bg-opacity-50 backdrop-blur-sm mt-auto">
+        <div class="container mx-auto text-center">
+            <p class="text-blue-200">&copy; 2025 Flight Insight. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

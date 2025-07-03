@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Insight | Contact Us</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        .search-box {
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .flight-card {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .flight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .price-tag {
+            background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+        }
+        
+        .tab-active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        
+        .airline-logo {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .search-button {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .search-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .contact-card {
+            transition: all 0.4s ease;
+        }
+        
+        .contact-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .form-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- Header -->
+    <header class="py-6 px-4 md:px-12 backdrop-blur-sm bg-black bg-opacity-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-plane-departure text-3xl text-blue-300"></i>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a href="{{ url_for('index') }}" class="hover:text-blue-300 transition border-b-2 border-blue-300 py-1 text-blue-300">Home</a>
+                
+                <div class="relative group">
+                    <a href="{{ url_for('explore') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Explore</a>
+                    <div class="absolute hidden group-hover:block mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-xl p-4 shadow-xl w-48 z-10">
+                        <a href="{{ url_for('explore') }}?category=europe" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Europe</a>
+                        <a href="{{ url_for('explore') }}?category=asia" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Asia</a>
+                        <a href="{{ url_for('explore') }}?category=americas" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Americas</a>
+                        <a href="{{ url_for('explore') }}?category=africa" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Africa</a>
+                        <a href="{{ url_for('explore') }}?category=oceania" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Oceania</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('deals') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1 relative">
+                    Deals
+                    <span class="absolute -top-2 -right-6 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">Hot</span>
+                </a>
+
+                <a href="{{ url_for('contact') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Contact</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('signin') }}" class="hidden md:block px-4 py-2 rounded-full bg-blue-500 hover:bg-blue-600 transition shadow-lg hover:shadow-blue-500/50">Sign In</a>
+                <button class="md:hidden text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="py-12 px-4 md:px-12">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">Get in <span class="bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Touch</span></h1>
+            <p class="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-12">We're here to help with any questions about your travel plans</p>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-8 px-4 md:px-12 mb-16">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Contact Info Cards -->
+                <div class="space-y-6">
+                    <div class="flight-card rounded-xl p-6 contact-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-envelope text-blue-300 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold mb-2">Email Us</h3>
+                                <p class="text-blue-200 mb-3">Our friendly team is here to help</p>
+                                <a href="mailto:support@flightinsight.com" class="text-blue-300 hover:text-blue-100 transition">support@flightinsight.com</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flight-card rounded-xl p-6 contact-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-phone-alt text-blue-300 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold mb-2">Call Us</h3>
+                                <p class="text-blue-200 mb-3">Mon-Fri from 8am to 5pm</p>
+                                <a href="tel:+1-555-123-4567" class="text-blue-300 hover:text-blue-100 transition">+1 (555) 123-4567</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flight-card rounded-xl p-6 contact-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-map-marker-alt text-blue-300 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold mb-2">Visit Us</h3>
+                                <p class="text-blue-200 mb-3">Come say hello at our office</p>
+                                <address class="text-blue-300 not-italic">
+                                    123 Travel Street<br>
+                                    San Francisco, CA 94158
+                                </address>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flight-card rounded-xl p-6 contact-card">
+                        <div class="flex items-start">
+                            <div class="w-12 h-12 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                                <i class="fas fa-comments text-blue-300 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold mb-2">Live Chat</h3>
+                                <p class="text-blue-200 mb-3">Chat with our customer service team</p>
+                                <button class="text-blue-300 hover:text-blue-100 transition flex items-center">
+                                    <span>Start a conversation</span>
+                                    <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Contact Form -->
+                <div class="lg:col-span-2">
+                    <div class="flight-card rounded-xl p-8">
+                        <h2 class="text-2xl font-bold mb-6">Send us a message</h2>
+                        <form>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label for="first-name" class="block text-blue-100 text-sm mb-2">First Name</label>
+                                    <input type="text" id="first-name" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 form-input" placeholder="Your first name">
+                                </div>
+                                <div>
+                                    <label for="last-name" class="block text-blue-100 text-sm mb-2">Last Name</label>
+                                    <input type="text" id="last-name" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 form-input" placeholder="Your last name">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label for="email" class="block text-blue-100 text-sm mb-2">Email</label>
+                                    <input type="email" id="email" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 form-input" placeholder="your@email.com">
+                                </div>
+                                <div>
+                                    <label for="phone" class="block text-blue-100 text-sm mb-2">Phone Number</label>
+                                    <input type="tel" id="phone" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 form-input" placeholder="(555) 123-4567">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label for="subject" class="block text-blue-100 text-sm mb-2">Subject</label>
+                                <select id="subject" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 form-input">
+                                    <option value="" disabled selected>Select a subject</option>
+                                    <option value="booking">Booking Inquiry</option>
+                                    <option value="support">Customer Support</option>
+                                    <option value="feedback">Feedback</option>
+                                    <option value="partnership">Partnership Opportunity</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <label for="message" class="block text-blue-100 text-sm mb-2">Message</label>
+                                <textarea id="message" rows="5" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500 form-input" placeholder="How can we help you?"></textarea>
+                            </div>
+                            
+                            <div class="mb-6 flex items-start">
+                                <input type="checkbox" id="privacy" class="mt-1 mr-2">
+                                <label for="privacy" class="text-blue-200 text-sm">I agree to the <a href="#" class="text-blue-300 hover:text-blue-100 transition">Privacy Policy</a> and consent to being contacted by Flight Insight.</label>
+                            </div>
+                            
+                            <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-bold hover:from-blue-600 hover:to-blue-700 transition flex items-center search-button shadow-lg shadow-blue-500/30">
+                                <i class="fas fa-paper-plane mr-2"></i> Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-12 px-4 md:px-12 bg-gray-900 bg-opacity-30 backdrop-blur-sm">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold mb-12 text-center">Frequently Asked <span class="bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Questions</span></h2>
+            
+            <div class="max-w-4xl mx-auto space-y-6">
+                <div class="flight-card rounded-xl overflow-hidden">
+                    <button class="w-full flex justify-between items-center p-6 text-left">
+                        <h3 class="text-xl font-bold">How do I change or cancel my flight booking?</h3>
+                        <i class="fas fa-chevron-down text-blue-300"></i>
+                    </button>
+                    <div class="px-6 pb-6">
+                        <p class="text-blue-200">You can change or cancel your flight booking by logging into your account and navigating to "My Trips." From there, select the booking you wish to modify and follow the instructions. Please note that change and cancellation policies vary by airline and fare type.</p>
+                    </div>
+                </div>
+                
+                <div class="flight-card rounded-xl overflow-hidden">
+                    <button class="w-full flex justify-between items-center p-6 text-left">
+                        <h3 class="text-xl font-bold">What payment methods do you accept?</h3>
+                        <i class="fas fa-chevron-down text-blue-300"></i>
+                    </button>
+                    <div class="px-6 pb-6">
+                        <p class="text-blue-200">We accept all major credit and debit cards including Visa, Mastercard, American Express, and Discover. We also support PayPal, Apple Pay, and Google Pay for your convenience and security.</p>
+                    </div>
+                </div>
+                
+                <div class="flight-card rounded-xl overflow-hidden">
+                    <button class="w-full flex justify-between items-center p-6 text-left">
+                        <h3 class="text-xl font-bold">How can I get a receipt for my booking?</h3>
+                        <i class="fas fa-chevron-down text-blue-300"></i>
+                    </button>
+                    <div class="px-6 pb-6">
+                        <p class="text-blue-200">A receipt is automatically sent to the email address you provided during booking. If you need another copy, you can log into your account, go to "My Trips," select the relevant booking, and click on "Get Receipt."</p>
+                    </div>
+                </div>
+                
+                <div class="flight-card rounded-xl overflow-hidden">
+                    <button class="w-full flex justify-between items-center p-6 text-left">
+                        <h3 class="text-xl font-bold">Do you offer travel insurance?</h3>
+                        <i class="fas fa-chevron-down text-blue-300"></i>
+                    </button>
+                    <div class="px-6 pb-6">
+                        <p class="text-blue-200">Yes, we offer comprehensive travel insurance options that can be added during the booking process. Our insurance covers trip cancellation, medical emergencies, lost luggage, and more. We recommend reviewing the policy details before purchase.</p>
+                    </div>
+                </div>
+                
+                <div class="flight-card rounded-xl overflow-hidden">
+                    <button class="w-full flex justify-between items-center p-6 text-left">
+                        <h3 class="text-xl font-bold">How do I contact customer support?</h3>
+                        <i class="fas fa-chevron-down text-blue-300"></i>
+                    </button>
+                    <div class="px-6 pb-6">
+                        <p class="text-blue-200">You can contact our customer support team through multiple channels: email at support@flightinsight.com, phone at +1 (555) 123-4567, or through the live chat feature on our website. Our support team is available Monday through Friday from 8am to 5pm.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="py-12 px-4 md:px-12">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-8">Find Us</h2>
+            <div class="rounded-xl overflow-hidden h-96 flight-card">
+                <!-- Replace with actual map embed code -->
+                <div class="w-full h-full bg-gray-800 flex items-center justify-center">
+                    <p class="text-xl">Interactive Map Would Be Embedded Here</p>
+                    <!-- You can replace this with an actual Google Maps or other map service embed -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="py-12 px-4 md:px-12 mb-12 bg-cover bg-center rounded-3xl mx-4 md:mx-12" style="background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1474&q=80');">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-4">Get Travel Deals & Inspiration</h2>
+            <p class="text-xl text-blue-100 max-w-2xl mx-auto mb-8">Subscribe to our newsletter and never miss out on exclusive deals and travel tips</p>
+            
+            <div class="max-w-xl mx-auto">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <input type="email" placeholder="Your email address" class="flex-grow bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-bold hover:from-blue-600 hover:to-blue-700 transition search-button shadow-lg shadow-blue-500/30">
+                        Subscribe
+                    </button>
+                </div>
+                <p class="text-sm text-blue-200 mt-4">We respect your privacy. Unsubscribe at any time.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 md:px-12 bg-gray-900 bg-opacity-50 backdrop-blur-sm">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <i class="fas fa-plane-departure text-3xl text-blue-300"></i>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h2>
+                    </div>
+                    <p class="text-blue-200 mb-6">Discover the world with our curated flight deals and travel experiences.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-blue-300 hover:text-blue-100 transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-blue-100 transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-blue-100 transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-blue-100 transition"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Destinations</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Europe</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Asia</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Americas</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Africa</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Oceania</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Company</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">About Us</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Careers</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Blog</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Press</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Partners</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Support</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Help Center</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Contact Us</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Privacy Policy</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Terms of Service</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Trust & Safety</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-blue-100">
+                <p>&copy; 2025 Flight Insight. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle FAQ answers
+        document.querySelectorAll('.flight-card button').forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.nextElementSibling;
+                const icon = button.querySelector('i');
+                
+                if (answer.style.maxHeight) {
+                    answer.style.maxHeight = null;
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                } else {
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Insight | Explore Destinations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        .search-box {
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .flight-card {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .flight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .price-tag {
+            background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+        }
+        
+        .tab-active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        
+        .airline-logo {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .search-button {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .search-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .destination-card {
+            transition: all 0.4s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .destination-card:hover {
+            transform: scale(1.03);
+        }
+        
+        .category-tab {
+            transition: all 0.3s ease;
+        }
+        
+        .category-tab.active {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        
+        .destination-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .destination-item {
+            height: 250px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+        
+        .destination-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .destination-item:hover .destination-overlay {
+            opacity: 1;
+        }
+        
+        .destination-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            padding: 1.5rem;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        
+        .destination-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- Header -->
+    <header class="py-6 px-4 md:px-12 backdrop-blur-sm bg-black bg-opacity-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-plane-departure text-3xl text-blue-300"></i>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a href="{{ url_for('index') }}" class="hover:text-blue-300 transition border-b-2 border-blue-300 py-1 text-blue-300">Home</a>
+                
+                <div class="relative group">
+                    <a href="{{ url_for('explore') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Explore</a>
+                    <div class="absolute hidden group-hover:block mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-xl p-4 shadow-xl w-48 z-10">
+                        <a href="{{ url_for('explore') }}?category=europe" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Europe</a>
+                        <a href="{{ url_for('explore') }}?category=asia" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Asia</a>
+                        <a href="{{ url_for('explore') }}?category=americas" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Americas</a>
+                        <a href="{{ url_for('explore') }}?category=africa" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Africa</a>
+                        <a href="{{ url_for('explore') }}?category=oceania" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Oceania</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('deals') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1 relative">
+                    Deals
+                    <span class="absolute -top-2 -right-6 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">Hot</span>
+                </a>
+
+                <a href="{{ url_for('contact') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Contact</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('signin') }}" class="hidden md:block px-4 py-2 rounded-full bg-blue-500 hover:bg-blue-600 transition shadow-lg hover:shadow-blue-500/50">Sign In</a>
+                <button class="md:hidden text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="py-12 px-4 md:px-12 bg-cover bg-center" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1488085061387-422e29b40080?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1931&q=80');">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">Explore <span class="bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Destinations</span></h1>
+            <p class="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-12">Discover amazing places around the world and plan your next adventure</p>
+            
+            <!-- Search Box -->
+            <div class="max-w-3xl mx-auto p-6 rounded-2xl search-box">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-grow">
+                        <div class="relative">
+                            <input type="text" placeholder="Search destinations, attractions, or activities" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-search absolute left-3 top-3.5 text-blue-300"></i>
+                        </div>
+                    </div>
+                    <button class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-bold hover:from-blue-600 hover:to-blue-700 transition flex items-center search-button shadow-lg shadow-blue-500/30">
+                        <i class="fas fa-search mr-2"></i> Search
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Tabs -->
+    <section class="py-8 px-4 md:px-12">
+        <div class="container mx-auto">
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button id="all-tab" class="category-tab active px-6 py-2 rounded-full font-medium border-2 border-transparent hover:border-blue-300 transition">All Destinations</button>
+                <button id="europe-tab" class="category-tab px-6 py-2 rounded-full font-medium border-2 border-transparent hover:border-blue-300 transition">Europe</button>
+                <button id="asia-tab" class="category-tab px-6 py-2 rounded-full font-medium border-2 border-transparent hover:border-blue-300 transition">Asia</button>
+                <button id="americas-tab" class="category-tab px-6 py-2 rounded-full font-medium border-2 border-transparent hover:border-blue-300 transition">Americas</button>
+                <button id="africa-tab" class="category-tab px-6 py-2 rounded-full font-medium border-2 border-transparent hover:border-blue-300 transition">Africa</button>
+                <button id="oceania-tab" class="category-tab px-6 py-2 rounded-full font-medium border-2 border-transparent hover:border-blue-300 transition">Oceania</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Destinations Grid -->
+    <section class="py-8 px-4 md:px-12 mb-12">
+        <div class="container mx-auto">
+            <div class="destination-grid">
+                <!-- Europe -->
+                <div class="destination-item" data-category="europe">
+                    <img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1420&q=80" alt="Paris" class="w-full h-full object-cover">
+                    <div class="destination-badge">Popular</div>
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Paris, France</h3>
+                        <p class="text-blue-200 mb-2">From $299</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.8 (2,456 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="destination-item" data-category="europe">
+                    <img src="https://images.unsplash.com/photo-1520175480921-4edfa2983e0f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1467&q=80" alt="Santorini" class="w-full h-full object-cover">
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Santorini, Greece</h3>
+                        <p class="text-blue-200 mb-2">From $449</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.9 (3,210 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="destination-item" data-category="europe">
+                    <img src="https://images.unsplash.com/photo-1534351590666-13e3e96b5017?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Amsterdam" class="w-full h-full object-cover">
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Amsterdam, Netherlands</h3>
+                        <p class="text-blue-200 mb-2">From $329</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.7 (1,890 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Asia -->
+                <div class="destination-item" data-category="asia">
+                    <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1494&q=80" alt="Tokyo" class="w-full h-full object-cover">
+                    <div class="destination-badge">Popular</div>
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Tokyo, Japan</h3>
+                        <p class="text-blue-200 mb-2">From $799</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.8 (3,120 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="destination-item" data-category="asia">
+                    <img src="https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Bali" class="w-full h-full object-cover">
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Bali, Indonesia</h3>
+                        <p class="text-blue-200 mb-2">From $599</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.9 (4,567 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="destination-item" data-category="asia">
+                    <img src="https://linkstravelandtours.co.uk/wp-content/uploads/2018/12/bangkok-temple-dawn-thailand.jpg" alt="Bangkok" class="w-full h-full object-cover">
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Bangkok, Thailand</h3>
+                        <p class="text-blue-200 mb-2">From $499</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.6 (2,345 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Americas -->
+                <div class="destination-item" data-category="americas">
+                    <img src="https://images.unsplash.com/photo-1518391846015-55a9cc003b25?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="New York" class="w-full h-full object-cover">
+                    <div class="destination-badge">Popular</div>
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">New York, USA</h3>
+                        <p class="text-blue-200 mb-2">From $399</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.7 (3,890 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="destination-item" data-category="americas">
+                    <img src="https://images.unsplash.com/photo-1483729558449-99ef09a8c325?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Rio de Janeiro" class="w-full h-full object-cover">
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Rio de Janeiro, Brazil</h3>
+                        <p class="text-blue-200 mb-2">From $649</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.8 (2,120 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="destination-item" data-category="americas">
+                    <img src="https://images.unsplash.com/photo-1501594907352-04cda38ebc29?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1332&q=80" alt="Cancun" class="w-full h-full object-cover">
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Cancun, Mexico</h3>
+                        <p class="text-blue-200 mb-2">From $349</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.6 (3,450 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Africa -->
+                <div class="destination-item" data-category="africa">
+                    <img src="https://images.unsplash.com/photo-1523805009345-7448845a9e53?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80" alt="Cape Town" class="w-full h-full object-cover">
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Cape Town, South Africa</h3>
+                        <p class="text-blue-200 mb-2">From $699</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.8 (1,890 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="destination-item" data-category="africa">
+                    <img src="https://images.unsplash.com/photo-1489493585363-d69421e0edd3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Marrakech" class="w-full h-full object-cover">
+                    <div class="destination-badge">Popular</div>
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Marrakech, Morocco</h3>
+                        <p class="text-blue-200 mb-2">From $449</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.7 (2,340 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="destination-item" data-category="africa">
+                    <img src="https://images.unsplash.com/photo-1528277342758-f1d7613953a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Cairo" class="w-full h-full object-cover">
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Cairo, Egypt</h3>
+                        <p class="text-blue-200 mb-2">From $549</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.5 (1,780 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Oceania -->
+                <div class="destination-item" data-category="oceania">
+                    <img src="https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Sydney" class="w-full h-full object-cover">
+                    <div class="destination-badge">Popular</div>
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Sydney, Australia</h3>
+                        <p class="text-blue-200 mb-2">From $899</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.9 (3,450 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="destination-item" data-category="oceania">
+                    <img src="https://images.unsplash.com/photo-1507699622108-4be3abd695ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80" alt="Auckland" class="w-full h-full object-cover">
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Auckland, New Zealand</h3>
+                        <p class="text-blue-200 mb-2">From $949</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.8 (2,120 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="destination-item" data-category="oceania">
+                    <img src="https://images.unsplash.com/photo-1589330273594-fade1ee91647?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Fiji" class="w-full h-full object-cover">
+                    <div class="destination-overlay">
+                        <h3 class="text-xl font-bold">Fiji Islands</h3>
+                        <p class="text-blue-200 mb-2">From $1,099</p>
+                        <div class="flex items-center text-sm text-blue-200">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.9 (1,890 reviews)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Experiences -->
+    <section class="py-12 px-4 md:px-12 bg-gray-900 bg-opacity-50 backdrop-blur-sm rounded-3xl mx-4 md:mx-12 mb-12">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center">Featured <span class="bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Experiences</span></h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="flight-card rounded-xl overflow-hidden">
+                    <div class="relative h-48">
+                        <img src="https://images.unsplash.com/photo-1533105079780-92b9be482077?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80" alt="Hot Air Balloon" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-blue-500 text-white text-xs px-2 py-1 rounded-full">Top Rated</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Hot Air Balloon Ride</h3>
+                        <p class="text-blue-200 mb-4">Experience breathtaking views from above</p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center text-sm text-blue-200">
+                                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                <span>4.9 (1,230 reviews)</span>
+                            </div>
+                            <p class="font-bold text-white">From $199</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flight-card rounded-xl overflow-hidden">
+                    <div class="relative h-48">
+                        <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Diving" class="w-full h-full object-cover">
+                        <div class="absolute top-4 right-4 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-1 rounded-full">Popular</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Scuba Diving Adventure</h3>
+                        <p class="text-blue-200 mb-4">Explore vibrant coral reefs and marine life</p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center text-sm text-blue-200">
+                                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                <span>4.8 (2,450 reviews)</span>
+                            </div>
+                            <p class="font-bold text-white">From $149</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flight-card rounded-xl overflow-hidden">
+                    <div class="relative h-48">
+                        <img src="https://images.unsplash.com/photo-1605540436563-5bca919ae766?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80" alt="Cooking Class" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Local Cooking Class</h3>
+                        <p class="text-blue-200 mb-4">Learn authentic recipes from local chefs</p>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center text-sm text-blue-200">
+                                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                <span>4.7 (980 reviews)</span>
+                            </div>
+                            <p class="font-bold text-white">From $79</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-10">
+                <a href="experiences.html" class="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-bold hover:from-blue-600 hover:to-blue-700 transition shadow-lg shadow-blue-500/30">
+                    View All Experiences
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Travel Tips -->
+    <section class="py-12 px-4 md:px-12 mb-12">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center">Travel <span class="bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Tips & Guides</span></h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="flight-card rounded-xl overflow-hidden">
+                    <div class="relative h-48">
+                        <img src="https://images.unsplash.com/photo-1581553673739-c4906b5d0de8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Packing Tips" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-medium bg-blue-500 bg-opacity-20 text-blue-300 px-3 py-1 rounded-full">Travel Hacks</span>
+                        <h3 class="text-xl font-bold mt-3 mb-2">10 Essential Packing Tips for Long Flights</h3>
+                        <p class="text-blue-200 mb-4">Learn how to pack efficiently and travel comfortably on long-haul flights.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-blue-200">5 min read</span>
+                            <a href="#" class="text-blue-300 hover:text-blue-100 transition">Read More →</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flight-card rounded-xl overflow-hidden">
+                    <div class="relative h-48">
+                        <img src="https://images.unsplash.com/photo-1503220317375-aaad61436b1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Budget Travel" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-medium bg-green-500 bg-opacity-20 text-green-300 px-3 py-1 rounded-full">Budget Travel</span>
+                        <h3 class="text-xl font-bold mt-3 mb-2">How to Travel Europe on a Budget in 2023</h3>
+                        <p class="text-blue-200 mb-4">Discover money-saving tips and affordable destinations across Europe.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-blue-200">8 min read</span>
+                            <a href="#" class="text-blue-300 hover:text-blue-100 transition">Read More →</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flight-card rounded-xl overflow-hidden">
+                    <div class="relative h-48">
+                        <img src="https://images.unsplash.com/photo-1526772662000-3f88f10405ff?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80" alt="Solo Travel" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <span class="text-xs font-medium bg-purple-500 bg-opacity-20 text-purple-300 px-3 py-1 rounded-full">Solo Travel</span>
+                        <h3 class="text-xl font-bold mt-3 mb-2">Solo Travel Safety: Tips for First-Time Travelers</h3>
+                        <p class="text-blue-200 mb-4">Essential safety advice for those embarking on their first solo adventure.</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-blue-200">6 min read</span>
+                            <a href="#" class="text-blue-300 hover:text-blue-100 transition">Read More →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-10">
+                <a href="blog.html" class="inline-block px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-bold hover:from-blue-600 hover:to-blue-700 transition shadow-lg shadow-blue-500/30">
+                    View All Articles
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="py-12 px-4 md:px-12 mb-12 bg-cover bg-center rounded-3xl mx-4 md:mx-12" style="background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1474&q=80');">
+        <div class="container mx-auto text-center">
+            <h2 class="text-3xl font-bold mb-4">Get Travel Deals & Inspiration</h2>
+            <p class="text-xl text-blue-100 max-w-2xl mx-auto mb-8">Subscribe to our newsletter and never miss out on exclusive deals and travel tips</p>
+            
+            <div class="max-w-xl mx-auto">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <input type="email" placeholder="Your email address" class="flex-grow bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-bold hover:from-blue-600 hover:to-blue-700 transition search-button shadow-lg shadow-blue-500/30">
+                        Subscribe
+                    </button>
+                </div>
+                <p class="text-sm text-blue-200 mt-4">We respect your privacy. Unsubscribe at any time.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 md:px-12 bg-gray-900 bg-opacity-50 backdrop-blur-sm">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <i class="fas fa-plane-departure text-3xl text-blue-300"></i>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h2>
+                    </div>
+                    <p class="text-blue-200 mb-6">Discover the world with our curated flight deals and travel experiences.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-blue-300 hover:text-blue-100 transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-blue-100 transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-blue-100 transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-blue-100 transition"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Destinations</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Europe</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Asia</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Americas</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Africa</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Oceania</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Company</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">About Us</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Careers</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Blog</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Press</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Partners</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Support</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Help Center</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Contact Us</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Privacy Policy</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Terms of Service</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Trust & Safety</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-12 pt-8 text-center">
+                <p class="text-blue-200">&copy; 2025 Flight Insight. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Category Tabs -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all category tabs and destination items
+            const tabs = document.querySelectorAll('.category-tab');
+            const destinations = document.querySelectorAll('.destination-item');
+            
+            // Add click event to each tab
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Get category from tab id
+                    const category = this.id.replace('-tab', '');
+                    
+                    // Show/hide destinations based on category
+                    destinations.forEach(dest => {
+                        if (category === 'all') {
+                            dest.style.display = 'block';
+                        } else {
+                            if (dest.dataset.category === category) {
+                                dest.style.display = 'block';
+                            } else {
+                                dest.style.display = 'none';
+                            }
+                        }
+                    });
+                });
+            });
+            
+            // Check URL parameters for category filter
+            const urlParams = new URLSearchParams(window.location.search);
+            const categoryParam = urlParams.get('category');
+            
+            if (categoryParam) {
+                // Trigger click on the corresponding tab
+                const tabToClick = document.getElementById(categoryParam + '-tab');
+                if (tabToClick) {
+                    tabToClick.click();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

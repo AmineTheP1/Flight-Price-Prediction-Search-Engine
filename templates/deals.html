@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Insight | Hot Deals & Promotions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        .search-box {
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .flight-card {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .flight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .price-tag {
+            background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+        }
+        
+        .tab-active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        
+        .airline-logo {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .search-button {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .search-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .destination-card {
+            transition: all 0.4s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .destination-card:hover {
+            transform: scale(1.03);
+        }
+        
+        .deal-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.75rem;
+            background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+            color: white;
+            font-weight: bold;
+            font-size: 0.75rem;
+            border-radius: 9999px;
+            z-index: 10;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .countdown {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .countdown-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 0.5rem;
+        }
+        
+        .countdown-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        
+        .countdown-label {
+            font-size: 0.625rem;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+        
+        .deal-highlight {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .deal-highlight::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+            animation: highlight 3s infinite;
+        }
+        
+        @keyframes highlight {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+        
+        .flash-sale {
+            animation: flash 2s infinite;
+        }
+        
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- Header -->
+    <header class="py-6 px-4 md:px-12 backdrop-blur-sm bg-black bg-opacity-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-plane-departure text-3xl text-blue-300"></i>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a href="{{ url_for('index') }}" class="hover:text-blue-300 transition border-b-2 border-blue-300 py-1 text-blue-300">Home</a>
+                
+                <div class="relative group">
+                    <a href="{{ url_for('explore') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Explore</a>
+                    <div class="absolute hidden group-hover:block mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-xl p-4 shadow-xl w-48 z-10">
+                        <a href="{{ url_for('explore') }}?category=europe" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Europe</a>
+                        <a href="{{ url_for('explore') }}?category=asia" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Asia</a>
+                        <a href="{{ url_for('explore') }}?category=americas" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Americas</a>
+                        <a href="{{ url_for('explore') }}?category=africa" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Africa</a>
+                        <a href="{{ url_for('explore') }}?category=oceania" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Oceania</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('deals') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1 relative">
+                    Deals
+                    <span class="absolute -top-2 -right-6 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">Hot</span>
+                </a>
+
+                <a href="{{ url_for('contact') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Contact</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('signin') }}" class="hidden md:block px-4 py-2 rounded-full bg-blue-500 hover:bg-blue-600 transition shadow-lg hover:shadow-blue-500/50">Sign In</a>
+                <button class="md:hidden text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="py-12 px-4 md:px-12">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">Exclusive <span class="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">Flight Deals</span></h1>
+            <p class="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-8">Limited-time offers and special promotions to your favorite destinations</p>
+            
+            <!-- Countdown Timer -->
+            <div class="countdown mb-12">
+                <div class="mr-3 text-yellow-300">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-value">2</span>
+                    <span class="countdown-label">Days</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-value">18</span>
+                    <span class="countdown-label">Hours</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-value">45</span>
+                    <span class="countdown-label">Mins</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-value">30</span>
+                    <span class="countdown-label">Secs</span>
+                </div>
+                <div class="ml-3 text-sm">
+                    until deals expire
+                </div>
+            </div>
+            
+            <!-- Deal Categories -->
+            <div class="flex justify-center mb-8">
+                <div class="inline-flex bg-gray-800 rounded-full p-1 shadow-xl">
+                    <button id="all-tab" class="px-6 py-2 rounded-full font-medium tab-active transition-all duration-300">All Deals</button>
+                    <button id="flash-tab" class="px-6 py-2 rounded-full font-medium transition-all duration-300">Flash Sales</button>
+                    <button id="weekend-tab" class="px-6 py-2 rounded-full font-medium transition-all duration-300">Weekend Getaways</button>
+                    <button id="seasonal-tab" class="px-6 py-2 rounded-full font-medium transition-all duration-300">Seasonal</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Flash Sales Section -->
+    <section class="py-8 px-4 md:px-12 mb-12">
+        <div class="container mx-auto">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-3xl font-bold flex items-center">
+                    <i class="fas fa-bolt text-yellow-400 mr-3"></i>
+                    <span>Flash <span class="bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">Sales</span></span>
+                </h2>
+                <div class="flash-sale px-4 py-1 bg-red-500 rounded-full text-sm font-bold">
+                    24 HOURS ONLY
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Flash Sale Card 1 -->
+                <div class="flight-card rounded-xl overflow-hidden relative deal-highlight">
+                    <div class="deal-badge">-40%</div>
+                    <div class="relative h-48">
+                        <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1473&q=80" alt="Bali" class="w-full h-full object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                            <h3 class="text-xl font-bold">Bali, Indonesia</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Singapore_Airlines_Logo.svg/1200px-Singapore_Airlines_Logo.svg.png" alt="Singapore Airlines" class="h-6 mr-2 airline-logo">
+                                <span class="text-blue-200">Singapore Airlines</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                <span class="text-sm">4.8</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm text-blue-200 mb-1">Round Trip • Jun 15 - Jun 22</div>
+                                <div class="flex items-center">
+                                    <span class="text-sm line-through text-gray-400 mr-2">$1,299</span>
+                                    <span class="text-xl font-bold">$779</span>
+                                </div>
+                            </div>
+                            <button class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-lg shadow-blue-500/30">
+                                Book Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Flash Sale Card 2 -->
+                <div class="flight-card rounded-xl overflow-hidden relative deal-highlight">
+                    <div class="deal-badge">-35%</div>
+                    <div class="relative h-48">
+                        <img src="https://images.unsplash.com/photo-1542051841857-5f90071e7989?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Tokyo" class="w-full h-full object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                            <h3 class="text-xl font-bold">Tokyo, Japan</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center">
+                                <img src="https://upload.wikimedia.org/wikinews/en/thumb/3/3f/Japan_Airlines_logo.svg/2560px-Japan_Airlines_logo.svg.png" alt="Japan Airlines" class="h-6 mr-2 airline-logo">
+                                <span class="text-blue-200">Japan Airlines</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                <span class="text-sm">4.9</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm text-blue-200 mb-1">Round Trip • Jul 10 - Jul 20</div>
+                                <div class="flex items-center">
+                                    <span class="text-sm line-through text-gray-400 mr-2">$1,450</span>
+                                    <span class="text-xl font-bold">$945</span>
+                                </div>
+                            </div>
+                            <button class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-lg shadow-blue-500/30">
+                                Book Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Flash Sale Card 3 -->
+                <div class="flight-card rounded-xl overflow-hidden relative deal-highlight">
+                    <div class="deal-badge">-45%</div>
+                    <div class="relative h-48">
+                        <img src="https://images.unsplash.com/photo-1534351590666-13e3e96b5017?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Barcelona" class="w-full h-full object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                            <h3 class="text-xl font-bold">Barcelona, Spain</h3>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Logo_iberia_2013.png/1200px-Logo_iberia_2013.png" alt="Iberia" class="h-6 mr-2 airline-logo">
+                                <span class="text-blue-200">Iberia</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                <span class="text-sm">4.7</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm text-blue-200 mb-1">Round Trip • Jun 5 - Jun 12</div>
+                                <div class="flex items-center">
+                                    <span class="text-sm line-through text-gray-400 mr-2">$1,150</span>
+                                    <span class="text-xl font-bold">$629</span>
+                                </div>
+                            </div>
+                            <button class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-lg shadow-blue-500/30">
+                                Book Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Weekend Getaways -->
+    <section class="py-8 px-4 md:px-12 mb-12 bg-gray-900 bg-opacity-50 backdrop-blur-sm rounded-3xl mx-4 md:mx-12">
+        <div class="container mx-auto">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-3xl font-bold flex items-center">
+                    <i class="fas fa-calendar-weekend text-blue-300 mr-3"></i>
+                    <span>Weekend <span class="bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Getaways</span></span>
+                </h2>
+                <a href="#" class="text-blue-300 hover:text-blue-100 transition">View All <i class="fas fa-arrow-right ml-1"></i></a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <!-- Weekend Getaway 1 -->
+                <div class="flight-card rounded-xl overflow-hidden relative">
+                    <div class="deal-badge">-25%</div>
+                    <div class="relative h-40">
+                        <img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1420&q=80" alt="Paris" class="w-full h-full object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+                            <h3 class="text-lg font-bold">Paris, France</h3>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="text-sm text-blue-200">3 Days, 2 Nights</div>
+                            <div class="flex items-center">
+                                <i class="fas fa-star text-yellow-400 mr-1 text-xs"></i>
+                                <span class="text-xs">4.8</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <span class="text-sm line-through text-gray-400 mr-2">$399</span>
+                                <span class="text-lg font-bold">$299</span>
+                            </div>
+                            <button class="px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-lg shadow-blue-500/30">
+                                Book
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Weekend Getaway 2 -->
+                <div class="flight-card rounded-xl overflow-hidden relative">
+                    <div class="deal-badge">-30%</div>
+                    <div class="relative h-40">
+                        <img src="https://images.unsplash.com/photo-1520986606214-8b456906c813?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Rome" class="w-full h-full object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+                            <h3 class="text-lg font-bold">Rome, Italy</h3>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="text-sm text-blue-200">3 Days, 2 Nights</div>
+                            <div class="flex items-center">
+                                <i class="fas fa-star text-yellow-400 mr-1 text-xs"></i>
+                                <span class="text-xs">4.7</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <span class="text-sm line-through text-gray-400 mr-2">$450</span>
+                                <span class="text-lg font-bold">$315</span>
+                            </div>
+                            <button class="px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-lg shadow-blue-500/30">
+                                Book
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Weekend Getaway 3 -->
+                <div class="flight-card rounded-xl overflow-hidden relative">
+                    <div class="deal-badge">-20%</div>
+                    <div class="relative h-40">
+                        <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="London" class="w-full h-full object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+                            <h3 class="text-lg font-bold">London, UK</h3>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="text-sm text-blue-200">3 Days, 2 Nights</div>
+                            <div class="flex items-center">
+                                <i class="fas fa-star text-yellow-400 mr-1 text-xs"></i>
+                                <span class="text-xs">4.6</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <span class="text-sm line-through text-gray-400 mr-2">$480</span>
+                                <span class="text-lg font-bold">$384</span>
+                            </div>
+                            <button class="px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-lg shadow-blue-500/30">
+                                Book
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Weekend Getaway 4 -->
+                <div class="flight-card rounded-xl overflow-hidden relative">
+                    <div class="deal-badge">-15%</div>
+                    <div class="relative h-40">
+                        <img src="https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1483&q=80" alt="Venice" class="w-full h-full object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+                            <h3 class="text-lg font-bold">Venice, Italy</h3>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="text-sm text-blue-200">3 Days, 2 Nights</div>
+                            <div class="flex items-center">
+                                <i class="fas fa-star text-yellow-400 mr-1 text-xs"></i>
+                                <span class="text-xs">4.9</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <span class="text-sm line-through text-gray-400 mr-2">$520</span>
+                                <span class="text-lg font-bold">$442</span>
+                            </div>
+                            <button class="px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-lg shadow-blue-500/30">
+                                Book
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seasonal Deals -->
+    <section class="py-8 px-4 md:px-12 mb-12">
+        <div class="container mx-auto">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-3xl font-bold flex items-center">
+                    <i class="fas fa-sun text-yellow-400 mr-3"></i>
+                    <span>Seasonal <span class="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">Offers</span></span>
+                </h2>
+                <a href="#" class="text-blue-300 hover:text-blue-100 transition">View All <i class="fas fa-arrow-right ml-1"></i></a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Summer Special -->
+                <div class="flight-card rounded-xl overflow-hidden relative">
+                    <div class="deal-badge">Summer Special</div>
+                    <div class="relative h-64">
+                        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1473&q=80" alt="Summer Destinations" class="w-full h-full object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
+                            <h3 class="text-2xl font-bold">Summer Beach Getaways</h3>
+                            <p class="text-blue-200">Up to 30% off on beach destinations</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-blue-500 bg-opacity-20 text-blue-300 px-3 py-1 rounded-full text-sm">Maldives</span>
+                                <span class="bg-blue-500 bg-opacity-20 text-blue-300 px-3 py-1 rounded-full text-sm">Bali</span>
+                                <span class="bg-blue-500 bg-opacity-20 text-blue-300 px-3 py-1 rounded-full text-sm">Phuket</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm text-blue-200 mb-1">Valid until August 31, 2023</div>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">From $599</span>
+                                </div>
+                            </div>
+                            <button class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-lg shadow-blue-500/30">
+                                View Deals
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Winter Special -->
+                <div class="flight-card rounded-xl overflow-hidden relative">
+                    <div class="deal-badge">Winter Special</div>
+                    <div class="relative h-64">
+                        <img src="https://images.unsplash.com/photo-1517299321609-52687d1bc55a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Winter Destinations" class="w-full h-full object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
+                            <h3 class="text-2xl font-bold">Winter Wonderland Escapes</h3>
+                            <p class="text-blue-200">Up to 25% off on winter destinations</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-blue-500 bg-opacity-20 text-blue-300 px-3 py-1 rounded-full text-sm">Aspen</span>
+                                <span class="bg-blue-500 bg-opacity-20 text-blue-300 px-3 py-1 rounded-full text-sm">Zermatt</span>
+                                <span class="bg-blue-500 bg-opacity-20 text-blue-300 px-3 py-1 rounded-full text-sm">Whistler</span>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-sm text-blue-200 mb-1">Valid until December 31, 2023</div>
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold">From $699</span>
+                                </div>
+                            </div>
+                            <button class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-lg shadow-blue-500/30">
+                                View Deals
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Exclusive Deals -->
+    <section class="py-8 px-4 md:px-12 mb-12 bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl mx-4 md:mx-12">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-1/2 mb-8 md:mb-0">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Join Our <span class="bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Loyalty Program</span></h2>
+                    <p class="text-xl text-blue-100 mb-6">Get exclusive access to member-only deals and earn points on every booking.</p>
+                    <ul class="mb-8 space-y-3">
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-400 mr-3"></i>
+                            <span>Up to 15% extra discount on all bookings</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-400 mr-3"></i>
+                            <span>Early access to flash sales and limited offers</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-400 mr-3"></i>
+                            <span>Free cancellation on selected bookings</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-400 mr-3"></i>
+                            <span>Dedicated customer support</span>
+                        </li>
+                    </ul>
+                    <button class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 transition shadow-lg shadow-blue-500/30 flex items-center">
+                        Join Now <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <img src="https://images.unsplash.com/photo-1605152276897-4f618f831968?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Loyalty Program" class="rounded-xl shadow-2xl w-full max-w-md">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="py-12 px-4 md:px-12 mb-12">
+        <div class="container mx-auto text-center max-w-3xl">
+            <h2 class="text-3xl font-bold mb-4">Never Miss a <span class="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">Deal</span></h2>
+            <p class="text-xl text-blue-100 mb-8">Subscribe to our newsletter and be the first to know about exclusive flight deals and promotions.</p>
+            <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                <input type="email" placeholder="Your email address" class="flex-grow bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button class="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg font-medium hover:from-orange-600 hover:to-red-600 transition shadow-lg shadow-orange-500/30 whitespace-nowrap">
+                    Subscribe Now
+                </button>
+            </div>
+            <p class="text-sm text-blue-200 mt-4">By subscribing, you agree to receive marketing emails from us. You can unsubscribe at any time.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 md:px-12 bg-gray-900 bg-opacity-50 backdrop-blur-sm">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <i class="fas fa-plane-departure text-3xl text-blue-300"></i>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h1>
+                    </div>
+                    <p class="text-blue-100 mb-6">Discover the best flight deals and travel the world with confidence.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-blue-300 hover:text-white transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-white transition"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Quick Links</h3>
+                    <ul class="space-y-3">
+                        <li><a href="index.html" class="text-blue-100 hover:text-blue-300 transition">Home</a></li>
+                        <li><a href="explore.html" class="text-blue-100 hover:text-blue-300 transition">Explore</a></li>
+                        <li><a href="deals.html" class="text-blue-100 hover:text-blue-300 transition">Deals</a></li>
+                        <li><a href="contact.html" class="text-blue-100 hover:text-blue-300 transition">Contact</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">About Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Support</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">FAQs</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Help Center</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Privacy Policy</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Terms of Service</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Cookie Policy</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Contact Us</h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-3 text-blue-300"></i>
+                            <span class="text-blue-100">123 Travel Street, City, Country</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope mt-1 mr-3 text-blue-300"></i>
+                            <span class="text-blue-100">info@flightinsight.com</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-phone-alt mt-1 mr-3 text-blue-300"></i>
+                            <span class="text-blue-100">+1 (555) 123-4567</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-gray-700 text-center text-blue-200 text-sm">
+                <p>&copy; 2025 Flight Insight. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript for Tab Switching -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Deal category tabs
+            const allTab = document.getElementById('all-tab');
+            const flashTab = document.getElementById('flash-tab');
+            const weekendTab = document.getElementById('weekend-tab');
+            const seasonalTab = document.getElementById('seasonal-tab');
+            
+            const tabs = [allTab, flashTab, weekendTab, seasonalTab];
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('tab-active'));
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('tab-active');
+                    
+                    // Here you would normally filter the deals based on the selected tab
+                    // For demo purposes, we're just changing the tab appearance
+                });
+            });
+            
+            // Countdown timer functionality
+            function updateCountdown() {
+                // This is a demo countdown - in a real app, you'd calculate from a specific end date
+                const days = document.querySelector('.countdown-item:nth-child(2) .countdown-value');
+                const hours = document.querySelector('.countdown-item:nth-child(3) .countdown-value');
+                const mins = document.querySelector('.countdown-item:nth-child(4) .countdown-value');
+                const secs = document.querySelector('.countdown-item:nth-child(5) .countdown-value');
+                
+                let seconds = parseInt(secs.textContent);
+                let minutes = parseInt(mins.textContent);
+                let hoursVal = parseInt(hours.textContent);
+                let daysVal = parseInt(days.textContent);
+                
+                seconds--;
+                
+                if (seconds < 0) {
+                    seconds = 59;
+                    minutes--;
+                    
+                    if (minutes < 0) {
+                        minutes = 59;
+                        hoursVal--;
+                        
+                        if (hoursVal < 0) {
+                            hoursVal = 23;
+                            daysVal--;
+                            
+                            if (daysVal < 0) {
+                                // Reset or do something when countdown ends
+                                daysVal = 0;
+                                hoursVal = 0;
+                                minutes = 0;
+                                seconds = 0;
+                            }
+                        }
+                    }
+                }
+                
+                days.textContent = daysVal;
+                hours.textContent = hoursVal < 10 ? '0' + hoursVal : hoursVal;
+                mins.textContent = minutes < 10 ? '0' + minutes : minutes;
+                secs.textContent = seconds < 10 ? '0' + seconds : seconds;
+            }
+            
+            // Update countdown every second
+            setInterval(updateCountdown, 1000);
+        });
+    </script>
+</body>
+</html>

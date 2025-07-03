@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Insight | Find Your Perfect Flight</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        .search-box {
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .flight-card {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .flight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .price-tag {
+            background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+        }
+        
+        .tab-active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        
+        .airline-logo {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .search-button {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .search-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .destination-card {
+            transition: all 0.4s ease;
+            transform-style: preserve-3d;
+        }
+        
+        .destination-card:hover {
+            transform: scale(1.03);
+        }
+        
+        .hidden-form {
+            display: none;
+        }
+        
+        .form-active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Autocomplete Styles */
+        .autocomplete-suggestions {
+            /* Positioned by JS: absolute left-0 right-0 top-full ... */
+            /* Ensure it's above other elements within its relative parent */
+        }
+        .autocomplete-suggestions div:hover, 
+        .autocomplete-suggestions div.active-suggestion { /* For keyboard navigation */
+            background-color: #2563eb; /* Tailwind's blue-600 */
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- Header -->
+    <header class="py-6 px-4 md:px-12 backdrop-blur-sm bg-black bg-opacity-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-plane-departure text-3xl text-blue-300"></i>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a href="{{ url_for('index') }}" class="hover:text-blue-300 transition border-b-2 border-blue-300 py-1 text-blue-300">Home</a>
+                
+                <div class="relative group">
+                    <a href="{{ url_for('explore') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Explore</a>
+                    <div class="absolute hidden group-hover:block mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-xl p-4 shadow-xl w-48 z-10">
+                        <a href="{{ url_for('explore') }}?category=europe" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Europe</a>
+                        <a href="{{ url_for('explore') }}?category=asia" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Asia</a>
+                        <a href="{{ url_for('explore') }}?category=americas" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Americas</a>
+                        <a href="{{ url_for('explore') }}?category=africa" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Africa</a>
+                        <a href="{{ url_for('explore') }}?category=oceania" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Oceania</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('deals') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1 relative">
+                    Deals
+                    <span class="absolute -top-2 -right-6 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">Hot</span>
+                </a>
+
+                <a href="{{ url_for('contact') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Contact</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('signin') }}" class="hidden md:block px-4 py-2 rounded-full bg-blue-500 hover:bg-blue-600 transition shadow-lg hover:shadow-blue-500/50">Sign In</a>
+                <button class="md:hidden text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- Hero Section -->
+    <section class="py-12 px-4 md:px-12">
+        <div class="container mx-auto text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">Find Your Perfect <span class="bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight</span></h1>
+            <p class="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-12">Discover the best flight deals and travel the world with confidence</p>
+            
+            <!-- Search Tabs -->
+            <div class="flex justify-center mb-8">
+                <div class="inline-flex bg-gray-800 rounded-full p-1 shadow-xl">
+                    <button id="one-way-tab" class="px-6 py-2 rounded-full font-medium tab-active transition-all duration-300">One Way</button>
+                    <button id="round-trip-tab" class="px-6 py-2 rounded-full font-medium transition-all duration-300">Round Trip</button>
+                    <button id="multi-city-tab" class="px-6 py-2 rounded-full font-medium transition-all duration-300">Multi-City</button>
+                </div>
+            </div>
+            
+            <!-- Search Box -->
+            <div class="max-w-5xl mx-auto p-6 rounded-2xl search-box">
+                <!-- One Way Form -->
+                <div id="one-way-form" class="form-active">
+                    <form action="/search" method="POST">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="relative">
+                                <label class="block text-blue-100 text-sm mb-1">From</label>
+                                <div class="relative">
+                                    <input  type="text" name="from_code" placeholder="Airport Code (e.g. CMN)" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" required autocomplete="off">
+                                    <i class="fas fa-plane-departure absolute left-3 top-3.5 text-blue-300"></i>
+                                    <!-- Autocomplete suggestions will be injected here by JS -->
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <label class="block text-blue-100 text-sm mb-1">To</label>
+                                <div class="relative">
+                                    <input type="text" name="to_code" placeholder="Airport Code (e.g. CDG)" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" required autocomplete="off">
+                                    <i class="fas fa-plane-arrival absolute left-3 top-3.5 text-blue-300"></i>
+                                    <!-- Autocomplete suggestions will be injected here by JS -->
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <label class="block text-blue-100 text-sm mb-1">Departure</label>
+                                <div class="relative">
+                                    <input type="date" name="departure_date" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <label class="block text-blue-100 text-sm mb-1">Travelers</label>
+                                <div class="relative">
+                                    <select name="travelers" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="1">1 Adult</option>
+                                        <option value="2">2 Adults</option>
+                                        <option value="3">3 Adults</option>
+                                        <option value="4">4 Adults</option>
+                                        <option value="family">Family</option>
+                                    </select>
+                                    <i class="fas fa-users absolute left-3 top-3.5 text-blue-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex justify-center">
+                            <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full font-bold hover:from-blue-600 hover:to-blue-700 transition flex items-center search-button shadow-lg shadow-blue-500/30">
+                                <i class="fas fa-search mr-2"></i> Search Flights
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Round Trip Form -->
+                <div id="round-trip-form" class="hidden-form">
+                    <form action="/search" method="POST">
+                        <input type="hidden" name="trip_type" value="round">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            <div class="relative">
+                                <label class="block text-blue-100 text-sm mb-1">From</label>
+                                <div class="relative">
+                                    <input type="text" name="from_code" placeholder="Airport Code (e.g. CMN)" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" required autocomplete="off">
+                                    <i class="fas fa-plane-departure absolute left-3 top-3.5 text-blue-300"></i>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <label class="block text-blue-100 text-sm mb-1">To</label>
+                                <div class="relative">
+                                    <input type="text" name="to_code" placeholder="Airport Code (e.g. CDG)" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" required autocomplete="off">
+                                    <i class="fas fa-plane-arrival absolute left-3 top-3.5 text-blue-300"></i>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <label class="block text-blue-100 text-sm mb-1">Departure</label>
+                                <div class="relative">
+                                    <input type="date" name="departure_date" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <label class="block text-blue-100 text-sm mb-1">Return</label>
+                                <div class="relative">
+                                    <input type="date" name="return_date" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <label class="block text-blue-100 text-sm mb-1">Travelers</label>
+                                <div class="relative">
+                                    <select name="travelers" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="1">1 Adult</option>
+                                        <option value="2">2 Adults</option>
+                                        <option value="3">3 Adults</option>
+                                        <option value="4">4 Adults</option>
+                                        <option value="family">Family</option>
+                                    </select>
+                                    <i class="fas fa-users absolute left-3 top-3.5 text-blue-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex justify-center">
+                            <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full font-bold hover:from-blue-600 hover:to-blue-700 transition flex items-center search-button shadow-lg shadow-blue-500/30">
+                                <i class="fas fa-search mr-2"></i> Search Flights
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Multi-City Form -->
+                <div id="multi-city-form" class="hidden-form">
+                    <form action="/search" method="POST">
+                        <input type="hidden" name="trip_type" value="multi">
+                        <div class="space-y-4" id="multi-city-flights-container">
+                            <!-- First flight -->
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="relative">
+                                    <label class="block text-blue-100 text-sm mb-1">From</label>
+                                    <div class="relative">
+                                        <input type="text" name="from_code_1" placeholder="Airport Code (e.g. CMN)" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" required autocomplete="off">
+                                        <i class="fas fa-plane-departure absolute left-3 top-3.5 text-blue-300"></i>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <label class="block text-blue-100 text-sm mb-1">To</label>
+                                    <div class="relative">
+                                        <input type="text" name="to_code_1" placeholder="Airport Code (e.g. CDG)" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" required autocomplete="off">
+                                        <i class="fas fa-plane-arrival absolute left-3 top-3.5 text-blue-300"></i>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <label class="block text-blue-100 text-sm mb-1">Departure</label>
+                                    <div class="relative">
+                                        <input type="date" name="departure_date_1" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    </div>
+                                </div>
+                                <div class="relative md:col-span-1">
+                                    <label class="block text-blue-100 text-sm mb-1 opacity-0">Action</label>
+                                    <button type="button" class="w-full bg-gray-700 hover:bg-gray-600 rounded-lg py-3 px-4 transition remove-flight-btn">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Second flight -->
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="relative">
+                                    <label class="block text-blue-100 text-sm mb-1">From</label>
+                                    <div class="relative">
+                                        <input type="text" name="from_code_2" placeholder="Airport Code (e.g. CDG)" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" required autocomplete="off">
+                                        <i class="fas fa-plane-departure absolute left-3 top-3.5 text-blue-300"></i>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <label class="block text-blue-100 text-sm mb-1">To</label>
+                                    <div class="relative">
+                                        <input type="text" name="to_code_2" placeholder="Airport Code (e.g. CMN)" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" required autocomplete="off">
+                                        <i class="fas fa-plane-arrival absolute left-3 top-3.5 text-blue-300"></i>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <label class="block text-blue-100 text-sm mb-1">Departure</label>
+                                    <div class="relative">
+                                        <input type="date" name="departure_date_2" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    </div>
+                                </div>
+                                <div class="relative md:col-span-1">
+                                    <label class="block text-blue-100 text-sm mb-1 opacity-0">Action</label>
+                                    <button type="button" class="w-full bg-gray-700 hover:bg-gray-600 rounded-lg py-3 px-4 transition remove-flight-btn">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center" id="multi-city-controls">
+                                <button type="button" id="add-another-flight-btn" class="flex items-center space-x-2 text-blue-300 hover:text-blue-400 transition">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span>Add another flight</span>
+                                </button>
+                                <div class="relative">
+                                    <label class="block text-blue-100 text-sm mb-1">Travelers</label>
+                                    <div class="relative">
+                                        <select name="travelers" class="bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="1">1 Adult</option>
+                                            <option value="2">2 Adults</option>
+                                            <option value="3">3 Adults</option>
+                                            <option value="4">4 Adults</option>
+                                            <option value="family">Family</option>
+                                        </select>
+                                        <i class="fas fa-users absolute left-3 top-3.5 text-blue-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex justify-center">
+                            <button type="submit" class="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full font-bold hover:from-blue-600 hover:to-blue-700 transition flex items-center search-button shadow-lg shadow-blue-500/30">
+                                <i class="fas fa-search mr-2"></i> Search Flights
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Popular Destinations -->
+    <section class="py-12 px-4 md:px-12">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center">Popular Destinations</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="relative rounded-xl overflow-hidden h-48 group">
+                    <img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1420&q=80" alt="Paris" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-70"></div>
+                    <div class="absolute bottom-0 left-0 p-4">
+                        <h3 class="text-xl font-bold">Paris, France</h3>
+                        <p class="text-blue-200">From $299</p>
+                    </div>
+                    <div class="absolute top-4 right-4">
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition opacity-0 group-hover:opacity-100">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="relative rounded-xl overflow-hidden h-48 group">
+                    <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1494&q=80" alt="Tokyo" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-70"></div>
+                    <div class="absolute bottom-0 left-0 p-4">
+                        <h3 class="text-xl font-bold">Tokyo, Japan</h3>
+                        <p class="text-blue-200">From $799</p>
+                    </div>
+                    <div class="absolute top-4 right-4">
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition opacity-0 group-hover:opacity-100">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="relative rounded-xl overflow-hidden h-48 group">
+                    <img src="https://images.unsplash.com/photo-1518391846015-55a9cc003b25?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="New York" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-70"></div>
+                    <div class="absolute bottom-0 left-0 p-4">
+                        <h3 class="text-xl font-bold">New York, USA</h3>
+                        <p class="text-blue-200">From $199</p>
+                    </div>
+                    <div class="absolute top-4 right-4">
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition opacity-0 group-hover:opacity-100">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="relative rounded-xl overflow-hidden h-48 group">
+                    <img src="https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Bali" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-70"></div>
+                    <div class="absolute bottom-0 left-0 p-4">
+                        <h3 class="text-xl font-bold">Bali, Indonesia</h3>
+                        <p class="text-blue-200">From $599</p>
+                    </div>
+                    <div class="absolute top-4 right-4">
+                        <button class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition opacity-0 group-hover:opacity-100">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Best Price History -->
+    
+
+    <!-- Flight Results -->
+    <!-- <section class="py-12 px-4 md:px-12 bg-gray-900 bg-opacity-50">
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold">Flight Results</h2>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <select class="bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>Sort by: Price</option>
+                            <option>Sort by: Duration</option>
+                            <option>Sort by: Departure</option>
+                        </select>
+                    </div>
+                    <button class="p-2 rounded-lg bg-gray-800 bg-opacity-50 hover:bg-gray-700 transition">
+                        <i class="fas fa-sliders-h"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="space-y-4" id="flight-results"> -->
+                <!-- Flight cards will be inserted here by JavaScript -->
+            <!-- </div>
+            
+            <div class="mt-8 flex justify-center">
+                <button class="px-6 py-2 border border-blue-500 text-blue-500 rounded-full hover:bg-blue-500 hover:text-white transition">
+                    Load More Flights
+                </button>
+            </div>
+        </div>
+    </section> -->
+
+    <!-- Features -->
+    <section class="py-12 px-4 md:px-12">
+    <div class="container mx-auto">
+        <h2 class="text-3xl font-bold mb-8 text-center">Recently Found Cheap Flights</h2>
+        {% if recent_cheapest_flights %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for flight in recent_cheapest_flights %}
+            <div class="flight-card rounded-xl p-6 transition-all duration-300 ease-in-out hover:shadow-2xl transform hover:-translate-y-1">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="flex items-center">
+                        <img src="{{ flight.logo_url }}" alt="{{ flight.airline }}" class="h-10 w-10 object-contain mr-3 airline-logo rounded-full">
+                        <div>
+                            <h3 class="font-semibold text-lg">{{ flight.airline }}</h3>
+                            <p class="text-xs text-blue-200">
+                                {{ flight.from_location }} <i class="fas fa-arrow-right text-xs mx-1"></i> {{ flight.to_location }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="price-tag px-4 py-1.5 rounded-full text-sm font-bold">
+                        {{ flight.price }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-2xl font-bold">{{ flight.departure_time }}</p>
+                            <p class="text-xs text-blue-200">{{ flight.from_location }}</p>
+                        </div>
+                        <div class="flex-grow px-2 text-center">
+                            <div class="w-full h-px bg-blue-300 bg-opacity-50 relative">
+                                <i class="fas fa-plane text-blue-300 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-800 px-1 rounded-full"></i>
+                            </div>
+                            <p class="text-xs text-blue-200 mt-1">{{ flight.duration }} ({{ flight.stops }})</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-right">{{ flight.arrival_time }}</p>
+                            <p class="text-xs text-blue-200 text-right">{{ flight.to_location }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-xs text-blue-300 mb-4">
+                    <i class="far fa-calendar-alt mr-1"></i> Departs: {{ flight.departure_date }}
+                </div>
+
+                <a href="{{ flight.booking_link | default('#', true) }}" target="_blank" 
+                   class="block w-full text-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition shadow-md hover:shadow-lg">
+                    View Deal <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <p class="text-blue-200">No recent cheap flight deals found. Try searching for flights!</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+    <!-- Newsletter -->
+    <section class="py-12 px-4 md:px-12 bg-gray-900 bg-opacity-50">
+        <div class="container mx-auto max-w-4xl text-center">
+            <h2 class="text-3xl font-bold mb-4">Get Exclusive Flight Deals</h2>
+            <p class="text-xl text-blue-100 mb-8">Subscribe to our newsletter and be the first to know about special offers and discounts.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <input type="email" placeholder="Your email address" class="flex-grow max-w-md bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-bold hover:from-blue-600 hover:to-blue-700 transition">
+                    Subscribe
+                </button>
+            </div>
+        </div>
+    </section>
+    <section class="py-12 px-4 md:px-12">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center">Popular Destinations</h2>
+            {% if popular_destinations_data %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                {% for dest in popular_destinations_data %}
+                <a href="{{ url_for('localized_prediction', destination_code=dest.code) }}" class="block relative rounded-xl overflow-hidden h-48 group destination-card shadow-lg hover:shadow-blue-500/30">
+                    <img src="{{ dest.image_url }}" alt="{{ dest.name }}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-70 group-hover:opacity-80 transition-opacity duration-300"></div>
+                    <div class="absolute bottom-0 left-0 p-4">
+                        <h3 class="text-xl font-bold">{{ dest.name }}</h3>
+                        <p class="text-blue-200 text-sm">View Price Forecast</p>
+                    </div>
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-30">
+                        <span class="bg-blue-500 text-white p-3 rounded-full shadow-xl">
+                            <i class="fas fa-chart-line fa-lg"></i>
+                        </span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8 bg-gray-800 bg-opacity-30 rounded-xl">
+                <p class="text-blue-200">Popular destinations will be shown here soon!</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    <section class="py-12 px-4 md:px-12 bg-gray-900 bg-opacity-30">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold mb-2 text-center flex items-center justify-center">
+                <i class="fas fa-lightbulb text-yellow-400 mr-3"></i> Get Inspired
+            </h2>
+            <p class="text-center text-xl text-blue-100 mb-10">Discover your next adventure with our AI-powered recommendations!</p>
+            
+            {% if recommendations %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for rec in recommendations %}
+                <div class="ai-insights-card rounded-xl p-6 bg-gray-800 bg-opacity-50 backdrop-blur-sm border border-gray-700 hover:border-blue-500 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30 flex flex-col">
+                    <img src="{{ rec.destination_image_url }}" alt="{{ rec.destination_name }}" class="w-full h-48 object-cover rounded-lg mb-4">
+                    
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-bold text-blue-300 leading-tight">
+                            Flights to {{ rec.destination_name }}
+                        </h3>
+                        <div class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap
+                            {% if rec.trend == 'rising' %}bg-red-500 bg-opacity-80 text-white
+                            {% elif rec.trend == 'falling' %}bg-green-500 bg-opacity-80 text-white
+                            {% else %}bg-blue-500 bg-opacity-80 text-white{% endif %}">
+                            {% if rec.trend == 'rising' %}<i class="fas fa-arrow-trend-up mr-1"></i>Rising
+                            {% elif rec.trend == 'falling' %}<i class="fas fa-arrow-trend-down mr-1"></i>Falling
+                            {% else %}<i class="fas fa-equals mr-1"></i>Stable{% endif %}
+                        </div>
+                    </div>
+                    <p class="text-xs text-blue-400 mb-3">From {{ rec.origin_display }}</p>
+
+                    <div class="text-2xl font-bold mb-1 text-white">{{ rec.price_estimate_display }}</div>
+                    <p class="text-blue-300 text-xs mb-4">Estimated price for travel in ~30 days.</p>
+                    
+                    <p class="text-xs text-blue-400 italic mb-5 flex-grow"><i class="fas fa-info-circle mr-1"></i> {{ rec.reason }}</p>
+                    
+                    <a href="{{ rec.localized_predict_url }}" class="mt-auto block w-full text-center px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg font-semibold hover:from-purple-600 hover:to-blue-700 transition shadow-md hover:shadow-lg">
+                        <i class="fas fa-chart-line mr-2"></i> View Price Forecast
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12 bg-gray-800 bg-opacity-30 rounded-xl">
+                <i class="fas fa-compass-slash text-5xl text-blue-400 mb-4"></i>
+                <p class="text-xl text-blue-200">No travel recommendations available at the moment.</p>
+                <p class="text-sm text-blue-300 mt-2">Try searching for flights to help us tailor suggestions for you!</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+    <!-- AI Price Predictions Section -->
+        <!-- AI Price Predictions Section -->
+        <section class="py-12 px-4 md:px-12 bg-gray-900 bg-opacity-30">
+            <div class="container mx-auto">
+                <h2 class="text-3xl font-bold mb-8 text-center flex items-center justify-center">
+                    <i class="fas fa-robot text-purple-400 mr-3"></i> AI Price Predictions
+                </h2>
+                <p class="text-center text-xl text-blue-100 mb-8">Our AI predicts prices for popular routes in the next 30 days</p>
+                
+                {% if popular_route_predictions %}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {% for prediction in popular_route_predictions %}
+                    <div class="ai-insights-card rounded-xl p-6 bg-gray-800 bg-opacity-30 backdrop-blur-sm border border-gray-700 hover:border-blue-500 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="text-lg font-bold text-blue-300">{{ prediction.from }} to {{ prediction.to }}</h3>
+                            <div class="px-3 py-1 rounded-full text-sm font-bold {% if prediction.trend == 'rising' %}bg-red-500{% elif prediction.trend == 'falling' %}bg-green-500{% else %}bg-blue-500{% endif %}">
+                                {% if prediction.trend == 'rising' %}
+                                <i class="fas fa-arrow-trend-up"></i> Rising
+                                {% elif prediction.trend == 'falling' %}
+                                <i class="fas fa-arrow-trend-down"></i> Falling
+                                {% else %}
+                                <i class="fas fa-equals"></i> Stable
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="text-3xl font-bold mb-4">{{ prediction.predicted_price }}</div>
+                        
+                        <p class="text-blue-200 text-sm mb-6">Predicted price for a flight 30 days from now</p>
+                        
+                        <a href="{{ url_for('localized_prediction', destination_code=prediction.to) }}" class="block w-full text-center px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-600 rounded-lg font-semibold hover:from-purple-600 hover:to-blue-700 transition shadow-md hover:shadow-lg">
+                            <i class="fas fa-search mr-2"></i> View Localized Prediction
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-8 bg-gray-800 bg-opacity-30 rounded-xl">
+                    <p class="text-blue-200">No price predictions available yet. Try searching for flights to help train our AI!</p>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 md:px-12 bg-gray-900">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-plane-departure text-2xl text-blue-300"></i>
+                        <h3 class="text-xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h3>
+                    </div>
+                    <p class="text-blue-100 mb-4">Your trusted partner for finding the best flight deals and travel experiences.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-blue-300 hover:text-blue-400 text-xl"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-blue-400 text-xl"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-blue-400 text-xl"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-blue-400 text-xl"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">About Us</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Careers</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Blog</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Press</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Support</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Help Center</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Contact Us</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Privacy Policy</a></li>
+                        <li><a href="#" class="text-blue-100 hover:text-blue-300 transition">Terms of Service</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Download Our App</h4>
+                    <div class="space-y-3">
+                        <button class="w-full flex items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 rounded-lg py-2 px-4 transition">
+                            <i class="fab fa-apple text-2xl"></i>
+                            <span>App Store</span>
+                        </button>
+                        <button class="w-full flex items-center justify-center space-x-2 bg-gray-800 hover:bg-gray-700 rounded-lg py-2 px-4 transition">
+                            <i class="fab fa-google-play text-2xl"></i>
+                            <span>Google Play</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-blue-100">
+                <p>© 2025 Flight Insight. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Sample flight data (from original script)
+        // const flights = [ ... ]; // This was for flight results, not used for autocomplete
+
+        // Function to render flight cards (from original script)
+        // function renderFlights() { ... } // This was for flight results
+        
+        // Tab switching functionality (from original script)
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = {
+                'one-way-tab': 'one-way-form',
+                'round-trip-tab': 'round-trip-form',
+                'multi-city-tab': 'multi-city-form'
+            };
+            
+            function activateTab(tabId) {
+                document.querySelectorAll('#one-way-tab, #round-trip-tab, #multi-city-tab').forEach(tab => {
+                    tab.classList.remove('tab-active');
+                });
+                document.querySelectorAll('#one-way-form, #round-trip-form, #multi-city-form').forEach(form => {
+                    form.classList.remove('form-active');
+                    form.classList.add('hidden-form');
+                });
+                document.getElementById(tabId).classList.add('tab-active');
+                const formToShow = document.getElementById(tabs[tabId]);
+                if (formToShow) {
+                    formToShow.classList.remove('hidden-form');
+                    formToShow.classList.add('form-active');
+                }
+            }
+            
+            const oneWayTab = document.getElementById('one-way-tab');
+            const roundTripTab = document.getElementById('round-trip-tab');
+            const multiCityTab = document.getElementById('multi-city-tab');
+
+            if (oneWayTab) oneWayTab.addEventListener('click', () => activateTab('one-way-tab'));
+            if (roundTripTab) roundTripTab.addEventListener('click', () => activateTab('round-trip-tab'));
+            if (multiCityTab) multiCityTab.addEventListener('click', () => activateTab('multi-city-tab'));
+        });
+
+        // Flight data fetching for results (from original script)
+        // async function fetchFlightData() { ... }
+        // function processFlightData(searches) { ... }
+        // function getAirlineLogo(airlineName) { ... }
+        // function renderFlights(flights) { ... } // For search results
+        // document.addEventListener('DOMContentLoaded', async () => {
+        //     const flightsDataForResults = await fetchFlightData(); // Renamed to avoid conflict
+        //     renderFlights(flightsDataForResults); // For search results
+        // });
+    </script>
+
+    <!-- NEW SCRIPT FOR AUTOCOMPLETE AND MULTI-CITY FUNCTIONALITY -->
+    <script>
+        const iataData = [
+            { code: "CMN", name: "Mohammed V International Airport", city: "Casablanca", country: "Morocco" },
+            { code: "CDG", name: "Charles de Gaulle Airport", city: "Paris", country: "France" },
+            { code: "JFK", name: "John F. Kennedy International Airport", city: "New York", country: "USA" },
+            { code: "LHR", name: "London Heathrow Airport", city: "London", country: "UK" },
+            { code: "LAX", name: "Los Angeles International Airport", city: "Los Angeles", country: "USA" },
+            { code: "DXB", name: "Dubai International Airport", city: "Dubai", country: "UAE" },
+            { code: "HND", name: "Tokyo Haneda Airport", city: "Tokyo", country: "Japan" },
+            { code: "NRT", name: "Narita International Airport", city: "Tokyo", country: "Japan" },
+            { code: "AMS", name: "Amsterdam Airport Schiphol", city: "Amsterdam", country: "Netherlands" },
+            { code: "FRA", name: "Frankfurt Airport", city: "Frankfurt", country: "Germany" },
+            { code: "IST", name: "Istanbul Airport", city: "Istanbul", country: "Turkey" },
+            { code: "RAK", name: "Marrakesh Menara Airport", city: "Marrakesh", country: "Morocco" },
+            { code: "AGA", name: "Agadir-Al Massira Airport", city: "Agadir", country: "Morocco" },
+            { code: "TNG", name: "Tangier Ibn Battouta Airport", city: "Tangier", country: "Morocco" },
+            { code: "RBA", name: "Rabat-Salé Airport", city: "Rabat", country: "Morocco" },
+            { code: "BCN", name: "Barcelona–El Prat Airport", city: "Barcelona", country: "Spain" },
+            { code: "MAD", name: "Madrid-Barajas Airport", city: "Madrid", country: "Spain" },
+            { code: "FCO", name: "Rome Fiumicino Airport", city: "Rome", country: "Italy" },
+            { code: "MXP", name: "Milan Malpensa Airport", city: "Milan", country: "Italy" },
+            { code: "BER", name: "Berlin Brandenburg Airport", city: "Berlin", country: "Germany" },
+            { code: "MUC", name: "Munich Airport", city: "Munich", country: "Germany" },
+            { code: "ZRH", name: "Zurich Airport", city: "Zurich", country: "Switzerland" },
+            { code: "GVA", name: "Geneva Airport", city: "Geneva", country: "Switzerland" },
+            { code: "VIE", name: "Vienna International Airport", city: "Vienna", country: "Austria" },
+            { code: "BRU", name: "Brussels Airport", city: "Brussels", country: "Belgium" },
+            { code: "LIS", name: "Lisbon Airport", city: "Lisbon", country: "Portugal" },
+            { code: "ATH", name: "Athens International Airport", city: "Athens", country: "Greece" },
+            { code: "SVO", name: "Sheremetyevo International Airport", city: "Moscow", country: "Russia" },
+            { code: "PEK", name: "Beijing Capital International Airport", city: "Beijing", country: "China" },
+            { code: "PVG", name: "Shanghai Pudong International Airport", city: "Shanghai", country: "China" },
+            { code: "ICN", name: "Incheon International Airport", city: "Seoul", country: "South Korea" },
+            { code: "SIN", name: "Singapore Changi Airport", city: "Singapore", country: "Singapore" },
+            { code: "BKK", name: "Suvarnabhumi Airport", city: "Bangkok", country: "Thailand" },
+            { code: "KUL", name: "Kuala Lumpur International Airport", city: "Kuala Lumpur", country: "Malaysia" },
+            { code: "SYD", name: "Sydney Kingsford Smith Airport", city: "Sydney", country: "Australia" },
+            { code: "MEL", name: "Melbourne Airport", city: "Melbourne", country: "Australia" },
+            { code: "AKL", name: "Auckland Airport", city: "Auckland", country: "New Zealand" },
+            { code: "YYZ", name: "Toronto Pearson International Airport", city: "Toronto", country: "Canada" },
+            { code: "YVR", name: "Vancouver International Airport", city: "Vancouver", country: "Canada" },
+            { code: "MEX", name: "Mexico City International Airport", city: "Mexico City", country: "Mexico" },
+            { code: "GRU", name: "São Paulo/Guarulhos International Airport", city: "São Paulo", country: "Brazil" },
+            { code: "EZE", name: "Ministro Pistarini International Airport", city: "Buenos Aires", country: "Argentina" },
+            { code: "CAI", name: "Cairo International Airport", city: "Cairo", country: "Egypt" },
+            { code: "JNB", name: "O.R. Tambo International Airport", city: "Johannesburg", country: "South Africa" },
+            { code: "LOS", name: "Murtala Muhammed International Airport", city: "Lagos", country: "Nigeria" },
+            { code: "NBO", name: "Jomo Kenyatta International Airport", city: "Nairobi", country: "Kenya" },
+            { code: "DEL", name: "Indira Gandhi International Airport", city: "Delhi", country: "India" },
+            { code: "BOM", name: "Chhatrapati Shivaji Maharaj International Airport", city: "Mumbai", country: "India" },
+        ];
+
+        function createAutocompleteForInput(inputElement, data) {
+            const parentDiv = inputElement.parentNode;
+            let suggestionsContainer = parentDiv.querySelector('.autocomplete-suggestions');
+
+            if (!suggestionsContainer) {
+                suggestionsContainer = document.createElement('div');
+                // Adjusted classes for better positioning and appearance
+                suggestionsContainer.className = 'autocomplete-suggestions absolute left-0 right-0 top-full bg-gray-700 text-white rounded-b-lg shadow-lg mt-px z-20 max-h-48 sm:max-h-60 overflow-y-auto border border-gray-600';
+                suggestionsContainer.style.display = 'none';
+                parentDiv.appendChild(suggestionsContainer);
+            }
+            
+            // Ensure parentDiv is relative if not already
+            if (getComputedStyle(parentDiv).position !== 'relative') {
+                parentDiv.style.position = 'relative';
+            }
+
+
+            inputElement.addEventListener('input', function() {
+                const value = this.value.trim().toLowerCase();
+                suggestionsContainer.innerHTML = ''; 
+
+                if (value.length < 1) {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+
+                const filteredData = data.filter(item =>
+                    item.code.toLowerCase().startsWith(value) ||
+                    item.name.toLowerCase().includes(value) ||
+                    item.city.toLowerCase().includes(value)
+                ).slice(0, 7);
+
+                if (filteredData.length === 0) {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+
+                filteredData.forEach(item => {
+                    const suggestionItem = document.createElement('div');
+                    suggestionItem.className = 'p-2 hover:bg-blue-600 cursor-pointer text-sm';
+                    suggestionItem.innerHTML = `
+                        <span class="font-semibold">${item.code}</span> - ${item.name} <span class="text-xs text-gray-400">(${item.city}, ${item.country})</span>
+                    `;
+                    suggestionItem.addEventListener('mousedown', function(e) {
+                        inputElement.value = item.code;
+                        suggestionsContainer.style.display = 'none';
+                        suggestionsContainer.innerHTML = '';
+                        inputElement.focus(); 
+                    });
+                    suggestionsContainer.appendChild(suggestionItem);
+                });
+                suggestionsContainer.style.display = 'block';
+            });
+
+            inputElement.addEventListener('blur', function() {
+                setTimeout(() => {
+                    if (suggestionsContainer && !suggestionsContainer.matches(':hover')) {
+                        suggestionsContainer.style.display = 'none';
+                    }
+                }, 200);
+            });
+            
+            inputElement.addEventListener('keydown', function(e) {
+                const items = Array.from(suggestionsContainer.querySelectorAll('div'));
+                if (items.length === 0 || suggestionsContainer.style.display === 'none') return;
+
+                let activeIndex = items.findIndex(item => item.classList.contains('active-suggestion'));
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    activeIndex = (activeIndex + 1) % items.length;
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    activeIndex = (activeIndex - 1 + items.length) % items.length;
+                } else if (e.key === 'Enter' && activeIndex > -1) {
+                    e.preventDefault();
+                    if (items[activeIndex]) {
+                       items[activeIndex].dispatchEvent(new MouseEvent('mousedown'));
+                    }
+                    return;
+                } else if (e.key === 'Escape') {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                } else {
+                    return; 
+                }
+
+                items.forEach(item => item.classList.remove('active-suggestion', 'bg-blue-600'));
+                if (items[activeIndex]) {
+                    items[activeIndex].classList.add('active-suggestion', 'bg-blue-600');
+                    items[activeIndex].scrollIntoView({ block: 'nearest' });
+                }
+            });
+        }
+        
+        function initAllAutocompletes() {
+            const iataInputs = document.querySelectorAll('input[name^="from_code"], input[name^="to_code"]');
+            iataInputs.forEach(input => {
+                const parentDiv = input.parentNode;
+                if (parentDiv && !parentDiv.querySelector('.autocomplete-suggestions')) {
+                    createAutocompleteForInput(input, iataData);
+                }
+            });
+        }
+        
+        document.addEventListener('click', function(event) {
+            document.querySelectorAll('.autocomplete-suggestions').forEach(container => {
+                const inputField = container.parentNode.querySelector('input');
+                if (inputField && !container.parentNode.contains(event.target)) {
+                    container.style.display = 'none';
+                }
+            });
+        });
+
+        // Multi-city add/remove flight logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const multiCityForm = document.getElementById('multi-city-form');
+            if (!multiCityForm) return;
+
+            const addFlightButton = document.getElementById('add-another-flight-btn');
+            const flightsContainer = document.getElementById('multi-city-flights-container');
+            let flightCounter = 2; 
+
+            function addRemoveButtonListener(button) {
+                button.addEventListener('click', function() {
+                    const flightRow = this.closest('.grid.grid-cols-1'); // Simplified selector
+                    if (flightRow) {
+                        flightRow.remove();
+                    }
+                });
+            }
+
+            if (addFlightButton && flightsContainer) {
+                addFlightButton.addEventListener('click', function() {
+                    flightCounter++;
+                    const newFlightRow = document.createElement('div');
+                    newFlightRow.className = 'grid grid-cols-1 md:grid-cols-4 gap-4';
+                    newFlightRow.innerHTML = `
+                        <div class="relative">
+                            <label class="block text-blue-100 text-sm mb-1">From</label>
+                            <div class="relative">
+                                <input type="text" name="from_code_${flightCounter}" placeholder="Airport Code" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" required autocomplete="off">
+                                <i class="fas fa-plane-departure absolute left-3 top-3.5 text-blue-300"></i>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <label class="block text-blue-100 text-sm mb-1">To</label>
+                            <div class="relative">
+                                <input type="text" name="to_code_${flightCounter}" placeholder="Airport Code" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500" required autocomplete="off">
+                                <i class="fas fa-plane-arrival absolute left-3 top-3.5 text-blue-300"></i>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <label class="block text-blue-100 text-sm mb-1">Departure</label>
+                            <div class="relative">
+                                <input type="date" name="departure_date_${flightCounter}" class="w-full bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                        </div>
+                        <div class="relative md:col-span-1">
+                            <label class="block text-blue-100 text-sm mb-1 opacity-0">Action</label>
+                            <button type="button" class="w-full bg-gray-700 hover:bg-gray-600 rounded-lg py-3 px-4 transition remove-flight-btn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                    const controlsDiv = document.getElementById('multi-city-controls');
+                    if (controlsDiv) {
+                         flightsContainer.insertBefore(newFlightRow, controlsDiv);
+                    } else {
+                         flightsContainer.appendChild(newFlightRow); 
+                    }
+                    addRemoveButtonListener(newFlightRow.querySelector('.remove-flight-btn'));
+                    initAllAutocompletes(); // Re-initialize for new inputs
+                });
+            }
+            
+            // Add event listeners to initially existing remove buttons
+            flightsContainer.querySelectorAll('.remove-flight-btn').forEach(button => {
+                addRemoveButtonListener(button);
+            });
+
+            // Initial call for autocompletes
+            initAllAutocompletes();
+        });
+
+    </script>
+</body>
+</html>

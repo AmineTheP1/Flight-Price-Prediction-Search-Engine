@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Insight | Search Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        .flight-card {
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .flight-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .ai-insights-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .price-trend-up {
+            color: #ef4444;
+        }
+        
+        .price-trend-down {
+            color: #10b981;
+        }
+        
+        .recommendation-card {
+            background: rgba(59, 130, 246, 0.15);
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <!-- Header -->
+    <header class="py-6 px-4 md:px-12 backdrop-blur-sm bg-black bg-opacity-10">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-plane-departure text-3xl text-blue-300"></i>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a href="{{ url_for('index') }}" class="hover:text-blue-300 transition border-b-2 border-blue-300 py-1 text-blue-300">Home</a>
+                
+                <div class="relative group">
+                    <a href="{{ url_for('explore') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Explore</a>
+                    <div class="absolute hidden group-hover:block mt-2 bg-gray-800 bg-opacity-90 backdrop-blur-sm rounded-xl p-4 shadow-xl w-48 z-10">
+                        <a href="{{ url_for('explore') }}?category=europe" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Europe</a>
+                        <a href="{{ url_for('explore') }}?category=asia" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Asia</a>
+                        <a href="{{ url_for('explore') }}?category=americas" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Americas</a>
+                        <a href="{{ url_for('explore') }}?category=africa" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Africa</a>
+                        <a href="{{ url_for('explore') }}?category=oceania" class="block py-2 px-3 hover:bg-blue-500 hover:bg-opacity-20 rounded-lg transition">Oceania</a>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('deals') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1 relative">
+                    Deals
+                    <span class="absolute -top-2 -right-6 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse">Hot</span>
+                </a>
+
+                <a href="{{ url_for('contact') }}" class="hover:text-blue-300 transition border-b-2 border-transparent hover:border-blue-300 py-1">Contact</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <a href="{{ url_for('signin') }}" class="hidden md:block px-4 py-2 rounded-full bg-blue-500 hover:bg-blue-600 transition shadow-lg hover:shadow-blue-500/50">Sign In</a>
+                <button class="md:hidden text-2xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Results -->
+    <section class="py-12 px-4 md:px-12">
+        <div class="container mx-auto">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold mb-2">Flight Results</h2>
+                <p class="text-blue-200">
+                    {{ search.from_code }} to {{ search.to_code }} • {{ search.departure_date }}
+                </p>
+            </div>
+            
+            <!-- AI Insights Section -->
+            {% if ai_insights %}
+            <div class="mb-10">
+                <h3 class="text-2xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-robot text-purple-400 mr-2"></i> 
+                    AI Flight Insights
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Price Prediction Card -->
+                    <div class="ai-insights-card rounded-xl p-6">
+                        <h4 class="text-lg font-bold mb-2 text-blue-300">Price Prediction</h4>
+                        {% if ai_insights.predicted_price %}
+                        <div class="text-3xl font-bold mb-2">MAD {{ ai_insights.predicted_price }}</div>
+                        <p class="text-blue-200 text-sm">Our AI predicts this as the average price for your route</p>
+                        {% else %}
+                        <p class="text-blue-200">Not enough data to predict prices for this route yet.</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Price Trend Card -->
+                    <div class="ai-insights-card rounded-xl p-6">
+                        <h4 class="text-lg font-bold mb-2 text-blue-300">Price Trend</h4>
+                        {% if ai_insights.price_trend %}
+                        <div class="flex items-center mb-2">
+                            <span class="text-xl font-bold mr-2">
+                                {% if ai_insights.price_trend.trend == 'rising' %}
+                                <i class="fas fa-arrow-trend-up price-trend-up"></i> Rising
+                                {% else %}
+                                <i class="fas fa-arrow-trend-down price-trend-down"></i> Falling
+                                {% endif %}
+                            </span>
+                        </div>
+                        <p class="text-blue-200 text-sm">
+                            Min: MAD {{ ai_insights.price_trend.min_price|round|int }} • 
+                            Avg: MAD {{ ai_insights.price_trend.avg_price|round|int }} • 
+                            Max: MAD {{ ai_insights.price_trend.max_price|round|int }}
+                        </p>
+                        {% else %}
+                        <p class="text-blue-200">Not enough historical data for this route yet.</p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Recommendation Card -->
+                    <div class="ai-insights-card rounded-xl p-6">
+                        <h4 class="text-lg font-bold mb-2 text-blue-300">AI Recommendation</h4>
+                        {% if ai_insights.recommendation %}
+                        <div class="recommendation-card p-3 rounded-lg">
+                            <p class="font-medium">{{ ai_insights.recommendation }}</p>
+                        </div>
+                        {% else %}
+                        <p class="text-blue-200">Not enough data to make a recommendation yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Future Price Prediction Chart -->
+                {% if ai_insights.price_trend and ai_insights.price_trend.future_prices %}
+                <div class="mt-6 ai-insights-card rounded-xl p-6">
+                    <h4 class="text-lg font-bold mb-4 text-blue-300">7-Day Price Forecast</h4>
+                    <div class="h-64" id="priceChart"></div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- Flight Results -->
+            <div class="grid grid-cols-1 gap-6">
+                {% if flights %}
+                    {% for flight in flights %}
+                    <div class="flight-card rounded-xl p-6">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                            <div class="flex items-center mb-4 md:mb-0">
+                                <div class="w-12 h-12 bg-white bg-opacity-10 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fas fa-plane text-blue-300"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold">{{ flight.airline }}</h3>
+                                    <p class="text-sm text-blue-200">{{ flight.stops }}</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-col md:flex-row md:items-center md:space-x-8">
+                                <div class="flex items-center mb-4 md:mb-0">
+                                    <div class="text-center mr-6">
+                                        <p class="font-bold">{{ flight.departure_time }}</p>
+                                        <p class="text-sm text-blue-200">{{ flight.from }}</p>
+                                    </div>
+                                    <div class="relative">
+                                        <div class="w-24 h-px bg-blue-300"></div>
+                                        <div class="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                                            <i class="fas fa-plane text-blue-300 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="text-center ml-6">
+                                        <p class="font-bold">{{ flight.arrival_time }}</p>
+                                        <p class="text-sm text-blue-200">{{ flight.to }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end">
+                                    <p class="text-2xl font-bold">{{ flight.price }}</p>
+                                    <p class="text-sm text-blue-200">{{ flight.duration }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-xs bg-blue-500 bg-opacity-20 text-blue-300 px-3 py-1 rounded-full">{{ flight.source }}</span>
+                                {% if flight.business_price and flight.business_price != 'N/A' %}
+                                <span class="text-xs bg-purple-500 bg-opacity-20 text-purple-300 px-3 py-1 rounded-full ml-2">Business: {{ flight.business_price }}</span>
+                                {% endif %}
+                            </div>
+                            <a href="{{ flight.booking_link }}" target="_blank" class="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-bold hover:from-blue-600 hover:to-blue-700 transition">
+                                Book Now
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-search text-5xl text-blue-300 mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-2">No Flights Found</h3>
+                        <p class="text-blue-200 mb-6">We couldn't find any flights matching your search criteria.</p>
+                        <a href="/" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg font-bold hover:from-blue-600 hover:to-blue-700 transition">
+                            Try Another Search
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-4 md:px-12 bg-gray-900 bg-opacity-50 backdrop-blur-sm mt-12">
+        <div class="container mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <i class="fas fa-plane-departure text-3xl text-blue-300"></i>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent">Flight Insight</h2>
+                    </div>
+                    <p class="text-blue-200 mb-6">Discover the world with our curated flight deals and travel experiences.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-blue-300 hover:text-blue-100 transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-blue-100 transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-blue-100 transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-blue-300 hover:text-blue-100 transition"><i class="fab fa-pinterest"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Quick Links</h3>
+                    <ul class="space-y-3">
+                        <li><a href="/" class="text-blue-200 hover:text-blue-100 transition">Home</a></li>
+                        <li><a href="/explore" class="text-blue-200 hover:text-blue-100 transition">Explore Destinations</a></li>
+                        <li><a href="/deals" class="text-blue-200 hover:text-blue-100 transition">Flight Deals</a></li>
+                        <li><a href="/contact" class="text-blue-200 hover:text-blue-100 transition">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Resources</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Travel Guides</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">FAQs</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Terms & Conditions</a></li>
+                        <li><a href="#" class="text-blue-200 hover:text-blue-100 transition">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-6">Newsletter</h3>
+                    <p class="text-blue-200 mb-4">Subscribe to get special offers and flight deals.</p>
+                    <div class="flex">
+                        <input type="email" placeholder="Your email" class="flex-grow bg-gray-800 bg-opacity-50 border border-gray-700 rounded-l-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button class="bg-blue-500 hover:bg-blue-600 transition rounded-r-lg px-4">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-blue-200">
+                <p>&copy; 2025 Flight Insight. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chart.js for price prediction chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- JavaScript for price chart -->
+    {% if ai_insights and ai_insights.price_trend and ai_insights.price_trend.future_prices %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            // Extract data from the template
+            const futurePrices = {{ ai_insights.price_trend.future_prices|tojson }};
+            const dates = Object.keys(futurePrices);
+            const prices = Object.values(futurePrices);
+            
+            // Create gradient for chart background
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Predicted Price (MAD)',
+                        data: prices,
+                        borderColor: '#3b82f6',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: '#fff',
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#93c5fd'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#93c5fd',
+                            borderColor: '#3b82f6',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `MAD ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#93c5fd'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#93c5fd',
+                                callback: function(value) {
+                                    return 'MAD ' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    {% endif %}
+    
+    <!-- Optional: Animation library for enhanced UI effects -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const menuButton = document.querySelector('button.md\\:hidden');
+            const nav = document.querySelector('nav');
+            
+            if (menuButton && nav) {
+                menuButton.addEventListener('click', function() {
+                    nav.classList.toggle('hidden');
+                    nav.classList.toggle('flex');
+                    nav.classList.toggle('flex-col');
+                    nav.classList.toggle('absolute');
+                    nav.classList.toggle('top-20');
+                    nav.classList.toggle('right-0');
+                    nav.classList.toggle('bg-gray-900');
+                    nav.classList.toggle('bg-opacity-90');
+                    nav.classList.toggle('p-6');
+                    nav.classList.toggle('rounded-lg');
+                    nav.classList.toggle('w-64');
+                    nav.classList.toggle('space-y-4');
+                });
+            }
+            
+            // Add fade-in animation to flight cards
+            const flightCards = document.querySelectorAll('.flight-card');
+            flightCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100 + (index * 100));
+                }, 0);
+            });
+            
+            // Add animation to AI insights cards
+            const insightCards = document.querySelectorAll('.ai-insights-card');
+            insightCards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100 + (index * 100));
+                }, 0);
+            });
+        });
+    </script>
+</body>
+</html>
