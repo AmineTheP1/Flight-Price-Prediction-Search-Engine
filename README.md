@@ -1,7 +1,9 @@
-# Flight Price Prediction & Search Engine
+## Flight Price Prediction & Search Engine
 
 A comprehensive flight search and price prediction application that scrapes multiple travel websites and uses machine learning to predict flight prices.
-
+![Home](https://github.com/user-attachments/assets/28a767b4-caaf-432a-b3be-aa50e717a451)
+![Results](https://github.com/user-attachments/assets/e716a677-1f93-43af-8bdc-e88401c5fe54)
+![Predictions](https://github.com/user-attachments/assets/63635353-b0d0-4a66-a178-26278779f401)
 ## Features
 
 - **Multi-source Flight Search**: Scrapes Royal Air Maroc, TravelWings, and Aviasales
